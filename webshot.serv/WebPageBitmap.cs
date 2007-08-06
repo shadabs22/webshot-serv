@@ -67,6 +67,8 @@ namespace GetSiteThumbnail
 
             webBrowser.Size = new Size(width, height);
             webBrowser.ScrollBarsEnabled = scrollBarsEnabled;
+            webBrowser.ScriptErrorsSuppressed = true;
+
 
             webBrowser.Url = new Uri(url);
 
