@@ -4,21 +4,16 @@
 
 Add your content here.
 
-<img src="http://mpanthers.ru:777/?url=km.ru" /> http://km.ru/
-
-http://www.kommersant.ru/
-http://www.jdu.ru/
-http://www.2baksa.net/
-http://www.epidem.ru/
-http://www.eg.ru/
-http://mp3rank.ru/
-http://www.km.ru/news
-
+[http://km.ru/ http://217.174.99.21:777/?url=km.ru&.png]
+[http://www.kommersant.ru/ http://217.174.99.21:777/?url=www.kommersant.ru&.png]
+[http://www.jdu.ru/ http://217.174.99.21:777/?url=www.jdu.ru&.png]
+[http://www.2baksa.net/ http://217.174.99.21:777/?url=www.2baksa.net&.png]
+[http://www.eg.ru/ http://217.174.99.21:777/?url=www.eg.ru&.png]
+[http://www.km.ru/news/ http://217.174.99.21:777/?url=www.km.ru/news&.png]
+[http://mp3rank.ru/ http://217.174.99.21:777/?url=mp3rank.ru&.png]
 
 
 = Details =
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+Example
+
