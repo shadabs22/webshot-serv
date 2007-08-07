@@ -5,7 +5,7 @@ using System.Drawing.Imaging;
 using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
-
+using System.Threading;
 namespace GetSiteThumbnail
 {
     class WebPageBitmap
@@ -65,16 +65,20 @@ namespace GetSiteThumbnail
                 {
                     Application.DoEvents();
 
-                    //Console.WriteLine(webBrowser.DocumentText.Length);
-                    
                     TimeSpan span = DateTime.Now - start;
+
+
                     if (span.Seconds == 20)
                     {
                         Console.WriteLine("[{0}] 20 seconds passed, triggering Stop()", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                         webBrowser.Stop();
                     }
 
-                    if (span.Seconds >= 30) break;
+                    if (span.Seconds >= 30)
+                    {
+                        Console.WriteLine("[{0}] 30 seconds passed, breaking", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+                        break;
+                    }
                 }
 
                 webBrowser.Dispose();
