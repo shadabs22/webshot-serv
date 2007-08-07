@@ -1,0 +1,10 @@
+bin\Release\webshot.serv.exe
+bin\Release\webshot.serv.pdb
+obj\Release\ResolveAssemblyReference.cache
+obj\Release\webshot.serv.exe
+obj\Release\webshot.serv.pdb
+bin\Debug\webshot.serv.exe
+bin\Debug\webshot.serv.pdb
+obj\Debug\ResolveAssemblyReference.cache
+obj\Debug\webshot.serv.exe
+obj\Debug\webshot.serv.pdb
