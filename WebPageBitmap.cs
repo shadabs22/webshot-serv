@@ -6,6 +6,8 @@ using System.Drawing.Drawing2D;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.ComponentModel;
+
 namespace GetSiteThumbnail
 {
     class WebPageBitmap
@@ -51,10 +53,11 @@ namespace GetSiteThumbnail
             {
                 webBrowser = new WebBrowser();
                 webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(documentCompletedEventHandler);
-                //webBrowser.Navigating += new WebBrowserNavigatingEventHandler(documentNavigatingEventHandler);
+                webBrowser.NewWindow += new CancelEventHandler(documentCancelEventHandler);
 
                 webBrowser.Size = new Size(width, height);
                 webBrowser.ScrollBarsEnabled = scrollBarsEnabled;
+                webBrowser.ScriptErrorsSuppressed = true;
 
                 UriBuilder uri = new UriBuilder("http", url);
 
@@ -68,7 +71,7 @@ namespace GetSiteThumbnail
                     TimeSpan span = DateTime.Now - start;
 
 
-                    if (span.Seconds == 20)
+                    if (span.Seconds >= 20)
                     {
                         Console.WriteLine("[{0}] 20 seconds passed, triggering Stop()", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
                         webBrowser.Stop();
@@ -81,13 +84,14 @@ namespace GetSiteThumbnail
                     }
                 }
 
-                webBrowser.Dispose();
+                //webBrowser.Dispose();
             }
 		    catch (Exception e) 
 		    {
 			    Console.WriteLine("Error: "+e.Message+e.StackTrace);
 		    }
         }
+
 
         public void SaveThumbnail(string fileName, long q)
         {
@@ -99,7 +103,12 @@ namespace GetSiteThumbnail
             docThumbnail.Save(fileName, codec, codecParams);
         }
 
-        //private void documentNavigatingEventHandler(object sender, WebBrowserNavigatingEventArgs e){}
+        private void documentCancelEventHandler(object sender, CancelEventArgs e)
+        {
+            // Don't want pop-ups.
+            e.Cancel = true;
+        }
+
         private void documentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             //if (webBrowser.ReadyState != WebBrowserReadyState.Complete) return;

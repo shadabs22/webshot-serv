@@ -26,6 +26,7 @@ namespace T.Serv
 
                 if (context.Request.QueryString.Count == 0)
                 {
+                    context.Response.OutputStream.Close();
                     context.Response.Close();
                     return;
                 }
@@ -34,7 +35,6 @@ namespace T.Serv
                 int w = 240; //h = output height 
                 int h = 180; //w = output width 
                 long q = 80L; //q = quality level (30-70%) 
-
 
                 if (int.TryParse(context.Request.QueryString["w"], out val)) w = val;
                 if (int.TryParse(context.Request.QueryString["h"], out val)) h = val;
@@ -63,19 +63,46 @@ namespace T.Serv
 
                 if (File.Exists(fileName)) 
                 {
-                    FileStream fs = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                    int read;
-                    const int size = 4096;
-                    byte[] bytes = new byte[4096];
-                    while ((read = fs.Read(bytes, 0, size)) > 0)
-                    {
-                        context.Response.OutputStream.Write(bytes, 0, read);
-                    }
+                   WriteToStream(context.Response.OutputStream, fileName);
                 }
 
                 context.Response.OutputStream.Close();
                 context.Response.Close();
             }
+        }
+
+
+        static bool WriteToStream(Stream output, string fileName)
+        {
+            int bytesRead;
+            byte[] buffer = new byte[4096];
+            FileStream fs = null;
+
+            try
+            {
+                fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                long count = fs.Length;
+
+                while ((bytesRead = fs.Read(buffer, 0, (int)(count > 4096 ? 4096 : count))) > 0)
+                {
+                    try
+                    {
+                        output.Write(buffer, 0, bytesRead);
+                    }
+                    catch (System.Net.HttpListenerException ex)
+                    {   // client closed connection
+                        // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
+                        // 2. ErrorCode=64. The specified network name is no longer available.
+                        return true;
+                    }
+                    count -= bytesRead;
+                }
+            }
+            finally
+            {
+                if (fs != null) fs.Close();
+            }
+            return true;
         }
 
         public static void Main(string[] args)
