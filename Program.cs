@@ -13,7 +13,29 @@ namespace T.Serv
     {
         public class HttpWorker
         {
+            public class QueueWorker
+            {
+                private Queue<HttpListenerContext> queue = new Queue<HttpListenerContext>();
+
+                public void Fetch()
+                {
+                    if (queue.Count > 0)
+                    {
+                        HttpListenerContext context = queue.Dequeue();
+                        WebPageBitmap webBitmap = new WebPageBitmap(context);
+                    }
+                    Thread.Sleep(1000);
+                }
+
+                public void Enqueue(HttpListenerContext context)
+                {
+                    queue.Enqueue(context);
+                }
+
+            }
+
             private HttpListenerContext context;
+           
 
             public HttpWorker(HttpListenerContext context)
             {
@@ -22,104 +44,102 @@ namespace T.Serv
 
             public void Handle()
             {
-                Console.WriteLine("[{0}] GET: {2}, IP: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RemoteEndPoint, context.Request.RawUrl);
+                Console.WriteLine("[{0}] HttpWorker.Handle: {2}, ip: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RemoteEndPoint, context.Request.UserHostName);
 
                 if (context.Request.QueryString.Count == 0)
                 {
-                    context.Response.OutputStream.Close();
-                    context.Response.Close();
+                    //root
+                    StreamWriter writer = new StreamWriter(context.Response.OutputStream);
+                    writer.Write("/");
+                    writer.Close();
                     return;
                 }
-
-                int val;
-                int w = 240; //h = output height 
-                int h = 180; //w = output width 
-                long q = 80L; //q = quality level (30-70%) 
-
-                if (int.TryParse(context.Request.QueryString["w"], out val)) w = val;
-                if (int.TryParse(context.Request.QueryString["h"], out val)) h = val;
-
-                string fileName = "./web-shots/" + context.Request.QueryString["url"].Replace("/", "_").Replace("\\", "_") + "_" + w.ToString() + "x" + h.ToString() + ".png";
-
-                FileInfo file = new FileInfo(fileName);
+                
+                //getting image
+                FileInfo file = new FileInfo(WebPageBitmap.url2file(context.Request.RawUrl));
                 TimeSpan span = DateTime.Now - file.CreationTime;
-
+                
                 if (!file.Exists || span.TotalDays > 7 || context.Request.QueryString["force"] == "true")
                 {
-                    WebPageBitmap webBitmap = new WebPageBitmap(context.Request.QueryString["url"], w, h, false);
+                    new QueueWorker().Enqueue(context);
+                    //this.queue.Enqueue(context);
+                   //WebShotQueue webQueue = new WebShotQueue(context);
 
-                    if (webBitmap.isReady)
-                    {
-                        Directory.CreateDirectory(Path.GetDirectoryName(fileName));
-                        webBitmap.SaveThumbnail(fileName, q);
 
-                        Console.WriteLine("[{0}] Saved: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), fileName);
-                    }
-                    else
+                    //Thread.Sleep(5000);
+
+                    if (!file.Exists)
                     {
-                        fileName = "./window.png";
+                        file = new FileInfo("./time.png");
                     }
                 }
 
-                if (File.Exists(fileName)) 
-                {
-                   WriteToStream(context.Response.OutputStream, fileName);
-                }
+                WriteToStream(context.Response.OutputStream, file.ToString());
 
                 context.Response.OutputStream.Close();
                 context.Response.Close();
+                return;
             }
-        }
 
-
-        static bool WriteToStream(Stream output, string fileName)
-        {
-            int bytesRead;
-            byte[] buffer = new byte[4096];
-            FileStream fs = null;
-
-            try
+            static bool WriteToStream(Stream output, string fileName)
             {
-                fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                long count = fs.Length;
+                int bytesRead;
+                byte[] buffer = new byte[4096];
+                FileStream fs = null;
 
-                while ((bytesRead = fs.Read(buffer, 0, (int)(count > 4096 ? 4096 : count))) > 0)
+                if (!File.Exists(fileName)) return false;
+
+                try
                 {
-                    try
+                    fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    long count = fs.Length;
+
+                    while ((bytesRead = fs.Read(buffer, 0, (int)(count > 4096 ? 4096 : count))) > 0)
                     {
-                        output.Write(buffer, 0, bytesRead);
+                        try
+                        {
+                            output.Write(buffer, 0, bytesRead);
+                        }
+                        catch (System.Net.HttpListenerException ex)
+                        {   // client closed connection
+                            // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
+                            // 2. ErrorCode=64. The specified network name is no longer available.
+                            return true;
+                        }
+                        count -= bytesRead;
                     }
-                    catch (System.Net.HttpListenerException ex)
-                    {   // client closed connection
-                        // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
-                        // 2. ErrorCode=64. The specified network name is no longer available.
-                        return true;
-                    }
-                    count -= bytesRead;
                 }
+                finally
+                {
+                    if (fs != null) fs.Close();
+                }
+                return true;
             }
-            finally
+
+            public static void Main(string[] args)
             {
-                if (fs != null) fs.Close();
-            }
-            return true;
-        }
+                HttpListener listener = new HttpListener();
+                string localprefix = "http://*:" + 8080 + "/";
+                listener.Prefixes.Add(localprefix);
+                listener.Start();
 
-        public static void Main(string[] args)
-        {
-            HttpListener listener = new HttpListener();
-            string localprefix = "http://*:" + 8080 + "/";
-            listener.Prefixes.Add(localprefix);
-            listener.Start();
+                for (int i = 1; i <= 5; i++)
+                {
+                    Thread thread = new Thread(new ThreadStart(new QueueWorker().Fetch));
+                    thread.SetApartmentState(ApartmentState.STA);
+                    thread.Start();
+                }
 
-            Console.WriteLine("[{0}] HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
-            while (true)
-            {
-                HttpListenerContext context = listener.GetContext();
-
-                Thread thread = new Thread(new ThreadStart(new HttpWorker(context).Handle));
-                thread.SetApartmentState(ApartmentState.STA);
-                thread.Start();
+                
+                
+                Console.WriteLine("[{0}] HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
+                while (true)
+                {
+                    HttpListenerContext context = listener.GetContext();
+                    Thread thread = new Thread(new ThreadStart(new HttpWorker(context).Handle));
+                   // thread.SetApartmentState(ApartmentState.STA);
+                    thread.Start();
+                }
             }
         }
     }
