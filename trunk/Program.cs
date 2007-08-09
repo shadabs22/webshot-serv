@@ -5,16 +5,21 @@ using System.Net;
 using System.Threading;
 using System.IO;
 using System.Collections.Specialized;
+using System.Collections;
 using GetSiteThumbnail;
+using System.Windows.Forms;
 
 namespace T.Serv
 {
     class WebShotServer
     {
+        
+
         public class QueueWorker
         {
             private readonly object syncRoot;
             private Queue<WebShot> queue = new Queue<WebShot>();
+            public static Hashtable ht = new Hashtable();
 
             public QueueWorker()
             {
@@ -25,10 +30,9 @@ namespace T.Serv
             {
                 lock (syncRoot)
                 {
-                  foreach (WebShot s in queue.ToArray())
-                  {
-                      if (webShot.url == s.url) return;
-                  }
+                  if (ht[webShot.url] == "fetching") return;
+
+                  Console.WriteLine("[{0}] Enqueue: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url);
                   queue.Enqueue(webShot);
                 }
             }
@@ -37,13 +41,20 @@ namespace T.Serv
             {
                 while (true)
                 {
+                    //Console.WriteLine(Thread.CurrentThread.Name);
                     Thread.Sleep(1000);
 
-                    if (queue.Count > 0)
+                    lock (syncRoot)
                     {
-                        lock (syncRoot)
+                        if (queue.Count > 0)
                         {
-                            queue.Dequeue().Fetch();
+                            Thread thread = new Thread(new ThreadStart(queue.Peek().Fetch));
+                            thread.SetApartmentState(ApartmentState.STA);
+                            thread.Start();
+
+                            ht.Add(queue.Peek().url, "fetching");
+  
+                            queue.Dequeue();
                         }
                     }
                 }
@@ -62,7 +73,7 @@ namespace T.Serv
 
             public void Handle()
             {
-                Console.WriteLine("[{0}] Handle: {1}, ip: {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RawUrl, context.Request.RemoteEndPoint);
+                //Console.WriteLine("[{0}] Handle: {1}, ip: {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RawUrl, context.Request.RemoteEndPoint);
 
                 if (context.Request.QueryString.Count == 0)
                 {
@@ -77,8 +88,6 @@ namespace T.Serv
 
                 if (!webShot.isReady)
                 {
-                    Console.WriteLine("[{0}] Enqueue: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RawUrl);
-
                     queueworker.Enqueue(webShot);
                 }
                 
@@ -136,7 +145,7 @@ namespace T.Serv
                 for (int i = 1; i <= 5; i++)
                 {
                     Thread thread = new Thread(new ThreadStart(queueworker.Dequeue));
-                    thread.SetApartmentState(ApartmentState.STA);
+                    thread.Name = "qw_" + i.ToString();
                     thread.Start();
                 }
                                 
@@ -144,7 +153,6 @@ namespace T.Serv
                 while (true)
                 {
                     HttpListenerContext context = listener.GetContext();
-                    Thread thread = new Thread(new ThreadStart(new HttpWorker(context).Handle));
                     new Thread(new ThreadStart(new HttpWorker(context).Handle)).Start();
                 }
             }
