@@ -30,8 +30,7 @@ namespace GetSiteThumbnail
         private string rawurl;
         public string url;
         public bool isReady = false;
-
-
+        
         public WebShot(string url)
         {
             int val;
@@ -73,7 +72,7 @@ namespace GetSiteThumbnail
         public void Fetch()
         {
             Console.WriteLine("[{0}] Fetch: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), url);
-
+      
             try
             {
                 webBrowser = new WebBrowser();
@@ -94,19 +93,28 @@ namespace GetSiteThumbnail
 
                     TimeSpan span = DateTime.Now - start;
 
-                    if (span.Seconds >= 60)
+                    if (span.Seconds >= 30 * 2)
                     {
                         webBrowser.Stop();
                         Thread.Sleep(1000);
                     }
 
-                    if (span.Seconds >= 120)
+                    if (span.Seconds >= 60 * 2)
                     {
                         break;
                     }
                 }
-                
-                Save(url2file(rawurl));
+
+                if (this.isReady)
+                {
+                    Save(url2file(rawurl));
+                }
+                else
+                {
+                    this.isReady = true;
+                }
+
+                //webBrowser.Dispose();
             }
             catch (Exception e)
             {
@@ -120,8 +128,6 @@ namespace GetSiteThumbnail
  
             Directory.CreateDirectory(Path.GetDirectoryName(fileName));
             docThumbnail.Save(fileName, this.codec, this.codecParams);
-
-            isReady = true;
         }
         private void documentCancelEventHandler(object sender, CancelEventArgs e)
         {
@@ -142,6 +148,8 @@ namespace GetSiteThumbnail
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
 
             gfx.DrawImage(docImage, new Rectangle(0, 0, this.thumbwidth, this.thumbheight), docRect, GraphicsUnit.Pixel);
+            
+            isReady = true;
         }
 
         public byte[] GetStream()
