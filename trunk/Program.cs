@@ -11,32 +11,50 @@ namespace T.Serv
 {
     class WebShotServer
     {
-        public class HttpWorker
+        public class QueueWorker
         {
-            public class QueueWorker
+            private readonly object syncRoot;
+            private Queue<WebShot> queue = new Queue<WebShot>();
+
+            public QueueWorker()
             {
-                private Queue<HttpListenerContext> queue = new Queue<HttpListenerContext>();
-
-                public void Fetch()
-                {
-                    if (queue.Count > 0)
-                    {
-                        HttpListenerContext context = queue.Dequeue();
-                        WebPageBitmap webBitmap = new WebPageBitmap(context);
-                    }
-                    Thread.Sleep(1000);
-                }
-
-                public void Enqueue(HttpListenerContext context)
-                {
-                    queue.Enqueue(context);
-                }
-
+               syncRoot = new object();
             }
 
-            private HttpListenerContext context;
-           
+            public void Enqueue(WebShot webShot)
+            {
+                lock (syncRoot)
+                {
+                  foreach (WebShot s in queue.ToArray())
+                  {
+                      if (webShot.url == s.url) return;
+                  }
+                  queue.Enqueue(webShot);
+                }
+            }
+            
+            public void Dequeue()
+            {
+                while (true)
+                {
+                    Thread.Sleep(1000);
 
+                    if (queue.Count > 0)
+                    {
+                        lock (syncRoot)
+                        {
+                            queue.Dequeue().Fetch();
+                        }
+                    }
+                }
+            }
+        }
+
+        public class HttpWorker
+        {
+            private HttpListenerContext context;
+            public static QueueWorker queueworker = new QueueWorker();
+                    
             public HttpWorker(HttpListenerContext context)
             {
                 this.context = context;
@@ -44,7 +62,7 @@ namespace T.Serv
 
             public void Handle()
             {
-                Console.WriteLine("[{0}] HttpWorker.Handle: {2}, ip: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RemoteEndPoint, context.Request.UserHostName);
+                Console.WriteLine("[{0}] Handle: {1}, ip: {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RawUrl, context.Request.RemoteEndPoint);
 
                 if (context.Request.QueryString.Count == 0)
                 {
@@ -54,27 +72,18 @@ namespace T.Serv
                     writer.Close();
                     return;
                 }
-                
-                //getting image
-                FileInfo file = new FileInfo(WebPageBitmap.url2file(context.Request.RawUrl));
-                TimeSpan span = DateTime.Now - file.CreationTime;
-                
-                if (!file.Exists || span.TotalDays > 7 || context.Request.QueryString["force"] == "true")
+
+                WebShot webShot = new WebShot(context.Request.RawUrl);
+
+                if (!webShot.isReady)
                 {
-                    new QueueWorker().Enqueue(context);
-                    //this.queue.Enqueue(context);
-                   //WebShotQueue webQueue = new WebShotQueue(context);
+                    Console.WriteLine("[{0}] Enqueue: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RawUrl);
 
-
-                    //Thread.Sleep(5000);
-
-                    if (!file.Exists)
-                    {
-                        file = new FileInfo("./time.png");
-                    }
+                    queueworker.Enqueue(webShot);
                 }
-
-                WriteToStream(context.Response.OutputStream, file.ToString());
+                
+                byte[] buffer = webShot.GetStream();
+                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
 
                 context.Response.OutputStream.Close();
                 context.Response.Close();
@@ -120,25 +129,23 @@ namespace T.Serv
             {
                 HttpListener listener = new HttpListener();
                 string localprefix = "http://*:" + 8080 + "/";
+                                
                 listener.Prefixes.Add(localprefix);
                 listener.Start();
 
                 for (int i = 1; i <= 5; i++)
                 {
-                    Thread thread = new Thread(new ThreadStart(new QueueWorker().Fetch));
+                    Thread thread = new Thread(new ThreadStart(queueworker.Dequeue));
                     thread.SetApartmentState(ApartmentState.STA);
                     thread.Start();
                 }
-
-                
-                
+                                
                 Console.WriteLine("[{0}] HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
                 while (true)
                 {
                     HttpListenerContext context = listener.GetContext();
                     Thread thread = new Thread(new ThreadStart(new HttpWorker(context).Handle));
-                   // thread.SetApartmentState(ApartmentState.STA);
-                    thread.Start();
+                    new Thread(new ThreadStart(new HttpWorker(context).Handle)).Start();
                 }
             }
         }
