@@ -11,110 +11,109 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
 using System.Web;
+using System.Text;
 
 namespace GetSiteThumbnail
 {
     class WebShot
     {
-        private WebBrowser webBrowser;
-        private Bitmap docThumbnail;
         private Bitmap docImage;
+        private Bitmap docThumbnail;
         private Rectangle docRect;
         private ImageCodecInfo codec;
         private EncoderParameters codecParams;
+        private int thumbwidth = 240;
+        private int thumbheight = 170;
 
-        private int width;
-        private int height;
-        private int thumbwidth;
-        private int thumbheight;
+        public static int width = 1024;
+        public static int height = 768;
+
+        public string url = null;
         private string rawurl;
-        public string url;
         public bool isReady = false;
-        
+        public bool isTimeout = false;
+
         public WebShot(string url)
         {
             int val;
-            this.width = 1024;
-            this.height = 768;
-            this.rawurl = url;
-
-            NameValueCollection QueryString = HttpUtility.ParseQueryString(url.Replace("/?", "").Replace("http://", ""));
-
-            this.url = QueryString["url"];
+            codec = GetEncoderInfo("image/png");
+            codecParams = new EncoderParameters(1);
+            codecParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 90L);
             
-            if (int.TryParse(QueryString["w"], out val)) { this.thumbwidth = val; } else { this.thumbwidth = 240; }
-            if (int.TryParse(QueryString["h"], out val)) { this.thumbheight = val; } else { this.thumbheight = 170; }
+            docImage = new Bitmap(width, height);
+            docRect = new Rectangle(0, 0, width, height);
 
-            this.codec = GetEncoderInfo("image/png");
-            this.codecParams = new EncoderParameters(1);
-            this.codecParams.Param[0] = new EncoderParameter(Encoder.Quality, 90L);
+            NameValueCollection q = HttpUtility.ParseQueryString(url.Replace("/?", "").Replace("http://", ""));
+                       
+            if (int.TryParse(q["w"], out val)) thumbwidth = val;
+            if (int.TryParse(q["h"], out val)) thumbheight = val;
 
-            this.docImage = new Bitmap(width, height);
-            this.docRect = new Rectangle(0, 0, width, height);
-            this.docThumbnail = new Bitmap(thumbwidth, thumbheight);
+            docThumbnail = new Bitmap(thumbwidth, thumbheight);
 
-            //getting image
-            FileInfo file = new FileInfo(url2file(url));
-            TimeSpan span = DateTime.Now - file.CreationTime;
-            
-            if (!file.Exists || span.TotalDays > 7 || QueryString["force"] == "true")
-            {
-                this.isReady = false;
-            }
-            else
-            {
-                this.docThumbnail = new Bitmap(file.ToString(), true);
-                this.isReady = true;
-            }
-
-        }
-
-        public void Fetch()
-        {
-            Console.WriteLine("[{0}] Fetch: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), url);
-      
             try
             {
-                webBrowser = new WebBrowser();
-                webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(documentCompletedEventHandler);
+                new Uri("http://" + q["url"].Replace("http://", ""));
+                rawurl = url;
+                
+                this.url = q["url"];
+                
+                //getting image
+                FileInfo file = new FileInfo(url2file(url));
+                TimeSpan span = DateTime.Now - file.CreationTime;
+
+                if (file.Exists && span.TotalDays <= 7 && q["force"] != "true")
+                {
+                    docThumbnail = new Bitmap(file.ToString(), true);
+                    isReady = true;
+                }
+            }   
+            catch (Exception e)
+            {
+                return;
+            }
+        }
+
+        public void Fetch(int timeout)
+        {
+            try
+            {
+                WebBrowser webBrowser = new WebBrowser();
                 webBrowser.NewWindow += new CancelEventHandler(documentCancelEventHandler);
 
-                webBrowser.Size = new Size(width, height);
+                webBrowser.Size = new Size(WebShot.width, WebShot.height);
                 webBrowser.ScrollBarsEnabled = false;
                 webBrowser.ScriptErrorsSuppressed = true;
+                webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(documentCompletedEventHandler);
 
-                webBrowser.Navigate(url);
-
-                DateTime start = DateTime.Now;
-              
-                while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+                try
                 {
-                    Application.DoEvents();
+                    Console.WriteLine("[{0}] Fetch: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), url);
+                    webBrowser.Navigate(url, false);
 
-                    TimeSpan span = DateTime.Now - start;
-
-                    if (span.Seconds >= 30 * 2)
+                    DateTime start = DateTime.Now;
+                    while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
                     {
-                        webBrowser.Stop();
-                        Thread.Sleep(1000);
+                        Application.DoEvents();
+
+                        TimeSpan span = DateTime.Now - start;
+
+                        if (span.Seconds >= timeout)
+                        {
+                            isTimeout = true;
+                            documentCompletedEventHandler(webBrowser, new WebBrowserDocumentCompletedEventArgs(new Uri("http://" + url)));
+                            break;
+                        }
                     }
 
-                    if (span.Seconds >= 60 * 2)
+                    if (isReady)
                     {
-                        break;
+                        Save();
                     }
                 }
-
-                if (this.isReady)
+                finally
                 {
-                    Save(url2file(rawurl));
+                    webBrowser.Dispose();
                 }
-                else
-                {
-                    this.isReady = true;
-                }
-
-                //webBrowser.Dispose();
             }
             catch (Exception e)
             {
@@ -122,61 +121,62 @@ namespace GetSiteThumbnail
             }
         }
 
-        private void Save(string fileName)
+        public void Save(Stream output)
         {
+            MemoryStream stream = new MemoryStream();
+            docThumbnail.Save(stream, codec, codecParams);
+            
+            byte[] buffer = stream.ToArray();
+
+            try
+            {
+                 output.Write(buffer, 0, buffer.Length);
+            }
+            catch (System.Net.HttpListenerException ex)
+            {   // client closed connection
+                // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
+                // 2. ErrorCode=64. The specified network name is no longer available.
+                return;
+            }
+        }
+
+        public void Save()
+        {
+            string fileName = url2file(this.rawurl);
             Console.WriteLine("[{0}] Save: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), fileName);
- 
+
             Directory.CreateDirectory(Path.GetDirectoryName(fileName));
             docThumbnail.Save(fileName, this.codec, this.codecParams);
         }
+
         private void documentCancelEventHandler(object sender, CancelEventArgs e)
         {
             // Don't want pop-ups.
             e.Cancel = true;
         }
-        private void documentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs e)
+
+        public void documentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
             //if (webBrowser.ReadyState != WebBrowserReadyState.Complete) return;
-            if (webBrowser.Document.Url.ToString().IndexOf("shdoclc.dll") != -1) return;
-
-            webBrowser.DrawToBitmap(docImage, docRect);
+            WebBrowser webBrowser = sender as WebBrowser;
 
             Graphics gfx = Graphics.FromImage(docThumbnail);
 
             gfx.CompositingQuality = CompositingQuality.HighQuality;
             gfx.SmoothingMode = SmoothingMode.HighQuality;
             gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
-
-            gfx.DrawImage(docImage, new Rectangle(0, 0, this.thumbwidth, this.thumbheight), docRect, GraphicsUnit.Pixel);
             
+            if (webBrowser.Document.Url.ToString().IndexOf("shdoclc.dll") == -1)
+            {
+                webBrowser.DrawToBitmap(docImage, docRect);
+                gfx.DrawImage(docImage, new Rectangle(0, 0, thumbwidth, thumbheight), docRect, GraphicsUnit.Pixel);
+            }
+            else
+            {
+                gfx.FillRectangle(new HatchBrush(HatchStyle.HorizontalBrick, Color.Black, Color.White), new Rectangle(0, 0, thumbwidth, thumbheight));
+            }
+
             isReady = true;
-        }
-
-        public byte[] GetStream()
-        {
-            MemoryStream stream = new MemoryStream();
-            docThumbnail.Save(stream, this.codec, this.codecParams);
-            return stream.ToArray();
-        }
-
-        private string url2file(string url)
-        {
-            NameValueCollection QueryString;
-            try
-            {
-                int val;
-
-                QueryString = HttpUtility.ParseQueryString(url.Replace("/?", "").Replace("http://", ""));
-
-                if (!int.TryParse(QueryString["w"], out val)) QueryString.Add("w", "240");
-                if (!int.TryParse(QueryString["h"], out val)) QueryString.Add("h", "180");
-
-                return "./webshots/" + QueryString["url"].Replace("http://", "").Replace("/", "_").Replace("\\", "_") + "_" + QueryString["w"] + "x" + QueryString["h"] + ".png";
-            }
-            catch (Exception)
-            {
-                return "./time.png";
-            }
         }
 
         public static ImageCodecInfo GetEncoderInfo(String mimeType)
@@ -191,5 +191,27 @@ namespace GetSiteThumbnail
             }
             return null;
         }
+
+        public static string url2file(string url)
+        {
+            NameValueCollection q;
+            try
+            {
+                int val;
+
+                q = HttpUtility.ParseQueryString(url.Replace("/?", "").Replace("http://", ""));
+
+                if (!int.TryParse(q["w"], out val)) q.Add("w", "240");
+                if (!int.TryParse(q["h"], out val)) q.Add("h", "180");
+
+                return "./webshots/" + q["url"].Replace("http://", "").Replace("/", "_").Replace("\\", "_") + "_" + q["w"] + "x" + q["h"] + ".png";
+            }
+            catch (Exception)
+            {
+                return "./fixme.png";
+            }
+        }
+
+        
     }
 }
