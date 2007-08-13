@@ -8,63 +8,117 @@ using System.Collections.Specialized;
 using System.Collections;
 using GetSiteThumbnail;
 using System.Windows.Forms;
+using System.ComponentModel;
+using System.Web;
+using System.Runtime.InteropServices;
 
 namespace T.Serv
 {
     class WebShotServer
     {
-        
-
         public class QueueWorker
         {
             private readonly object syncRoot;
             private Queue<WebShot> queue = new Queue<WebShot>();
-            public static Hashtable ht = new Hashtable();
-
-            public QueueWorker()
+            private Queue<WebShot> slowqueue = new Queue<WebShot>();
+            public static Hashtable hash = new Hashtable();
+            
+            public QueueWorker(int count)
             {
                syncRoot = new object();
+               Thread thread;
+                              
+               for (int i = 1; i <= count; i++)
+               {
+                   thread = new Thread(new ThreadStart(this.Dequeue));
+                   thread.SetApartmentState(ApartmentState.STA);
+                   thread.Priority = ThreadPriority.Normal;
+                   thread.Name = "qw_" + i.ToString();
+                   thread.Start();
+               }
+
+               thread = new Thread(new ThreadStart(this.DequeueSlow));
+               thread.SetApartmentState(ApartmentState.STA);
+               thread.Priority = ThreadPriority.BelowNormal; 
+               thread.Start();
             }
 
             public void Enqueue(WebShot webShot)
             {
-                lock (syncRoot)
+                lock (this.syncRoot)
                 {
-                  if (ht[webShot.url] == "fetching") return;
-
-                  Console.WriteLine("[{0}] Enqueue: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url);
-                  queue.Enqueue(webShot);
+                    if (!hash.Contains(webShot.url))
+                    {
+                        hash.Add(webShot.url, "fetching");
+                        
+                        queue.Enqueue(webShot);
+                        Console.WriteLine("[{0}] Enqueue: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url);
+                    }
                 }
             }
-            
+
             public void Dequeue()
             {
                 while (true)
                 {
-                    //Console.WriteLine(Thread.CurrentThread.Name);
-                    Thread.Sleep(1000);
+                    WebShot webShot = null;
 
-                    lock (syncRoot)
+                    while (webShot == null)
                     {
-                        if (queue.Count > 0)
+                        lock (this.syncRoot)
                         {
-                            Thread thread = new Thread(new ThreadStart(queue.Peek().Fetch));
-                            thread.SetApartmentState(ApartmentState.STA);
-                            thread.Start();
-
-                            ht.Add(queue.Peek().url, "fetching");
-  
-                            queue.Dequeue();
+                            if (queue.Count > 0)
+                            {
+                                webShot = queue.Dequeue();
+                            }
                         }
+
+                        if (webShot == null) Thread.Sleep(1000);
                     }
+
+                    webShot.Fetch(30);
+
+                    if (webShot.isTimeout)
+                    {
+                        EnqueueSlow(webShot);
+                    }
+
+                    hash.Remove(webShot.url);
                 }
+            }
+
+            public void EnqueueSlow(WebShot webShot)
+            {
+                Console.WriteLine("[{0}] EnqueueSlow: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url);
+                slowqueue.Enqueue(webShot);
+            }
+
+            public void DequeueSlow()
+            {
+                while (true)
+                {
+                    WebShot webShot = null;
+
+                    while (webShot == null)
+                    {
+                        if (slowqueue.Count > 0)
+                        {
+                            webShot = slowqueue.Dequeue();
+                        }
+
+                        if (webShot == null) Thread.Sleep(1000);
+                    }
+                    
+                    webShot.Fetch(240);
+                }
+
             }
         }
 
         public class HttpWorker
         {
             private HttpListenerContext context;
-            public static QueueWorker queueworker = new QueueWorker();
+            public static QueueWorker queueworker;
                     
             public HttpWorker(HttpListenerContext context)
             {
@@ -73,29 +127,34 @@ namespace T.Serv
 
             public void Handle()
             {
-                //Console.WriteLine("[{0}] Handle: {1}, ip: {2}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), context.Request.RawUrl, context.Request.RemoteEndPoint);
+                Console.Write(".");
 
-                if (context.Request.QueryString.Count == 0)
+                if (context.Request.QueryString.Count == 0) //root
                 {
-                    //root
                     StreamWriter writer = new StreamWriter(context.Response.OutputStream);
                     writer.Write("/");
                     writer.Close();
                     return;
                 }
-
-                WebShot webShot = new WebShot(context.Request.RawUrl);
-
-                if (!webShot.isReady)
+                try
                 {
-                    queueworker.Enqueue(webShot);
-                }
-                
-                byte[] buffer = webShot.GetStream();
-                context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    WebShot webShot = new WebShot(context.Request.RawUrl);
 
-                context.Response.OutputStream.Close();
-                context.Response.Close();
+                    if (webShot.url != null && !webShot.isReady)
+                    {
+                        queueworker.Enqueue(webShot);
+                    }
+
+                    webShot.Save(context.Response.OutputStream);
+                   
+                    context.Response.OutputStream.Close();
+                    context.Response.Close();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Error: " + e.Message + e.StackTrace);
+                }
+
                 return;
             }
 
@@ -118,7 +177,7 @@ namespace T.Serv
                         {
                             output.Write(buffer, 0, bytesRead);
                         }
-                        catch (System.Net.HttpListenerException ex)
+                        catch (System.Net.HttpListenerException)
                         {   // client closed connection
                             // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
                             // 2. ErrorCode=64. The specified network name is no longer available.
@@ -137,19 +196,15 @@ namespace T.Serv
             public static void Main(string[] args)
             {
                 HttpListener listener = new HttpListener();
+
+                queueworker = new QueueWorker(5);
+
                 string localprefix = "http://*:" + 8080 + "/";
                                 
                 listener.Prefixes.Add(localprefix);
                 listener.Start();
-
-                for (int i = 1; i <= 5; i++)
-                {
-                    Thread thread = new Thread(new ThreadStart(queueworker.Dequeue));
-                    thread.Name = "qw_" + i.ToString();
-                    thread.Start();
-                }
                                 
-                Console.WriteLine("[{0}] HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
+                Console.WriteLine("[{0}] T.Serv 1.0b, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
                 while (true)
                 {
                     HttpListenerContext context = listener.GetContext();
