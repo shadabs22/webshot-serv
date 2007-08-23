@@ -8,3 +8,11 @@ bin\Debug\webshot.serv.pdb
 obj\Debug\ResolveAssemblyReference.cache
 obj\Debug\webshot.serv.exe
 obj\Debug\webshot.serv.pdb
+obj\Debug\webshot.serv.csproj.GenerateResource.Cache
+obj\Debug\webshot.serv.Properties.Resources.resources
+obj\Release\webshot.serv.Properties.Resources.resources
+obj\Release\webshot.serv.csproj.GenerateResource.Cache
+bin\Release\webshot.serv.exe.CodeAnalysisLog.xml
+bin\Release\webshot.serv.exe.lastcodeanalysissucceeded
+bin\Debug\webshot.serv.exe.CodeAnalysisLog.xml
+bin\Debug\webshot.serv.exe.lastcodeanalysissucceeded
