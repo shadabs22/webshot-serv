@@ -12,6 +12,7 @@ using System.ComponentModel;
 using System.Web;
 using System.Runtime.InteropServices;
 
+[assembly: CLSCompliant(true)]
 namespace T.Serv
 {
     class WebShotServer
@@ -22,27 +23,27 @@ namespace T.Serv
             private Queue<WebShot> queue = new Queue<WebShot>();
             private Queue<WebShot> slowqueue = new Queue<WebShot>();
             public static Hashtable hash = new Hashtable();
-            
+
             public QueueWorker(int count)
             {
-               syncRoot = new object();
-               Thread thread;
-                              
-               for (int i = 1; i <= count; i++)
-               {
-                   thread = new Thread(new ThreadStart(this.Dequeue));
-                   thread.SetApartmentState(ApartmentState.STA);
-                   thread.Priority = ThreadPriority.Normal;
-                   thread.Name = "qw_" + i.ToString();
-                   thread.Start();
-               }
+                syncRoot = new object();
+                
+                Thread thread;
 
-               thread = new Thread(new ThreadStart(this.DequeueSlow));
-               thread.SetApartmentState(ApartmentState.STA);
-               thread.Priority = ThreadPriority.BelowNormal; 
-               thread.Start();
+                for (int i = 1; i <= count; i++)
+                {
+                    thread = new Thread(new ThreadStart(this.Dequeue));
+                    thread.SetApartmentState(ApartmentState.STA);
+                    thread.Priority = ThreadPriority.Normal;
+                    thread.Start();
+                }
+
+                thread = new Thread(new ThreadStart(this.DequeueSlow));
+                thread.SetApartmentState(ApartmentState.STA);
+                thread.Priority = ThreadPriority.BelowNormal;
+                thread.Start();
             }
-
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)")]
             public void Enqueue(WebShot webShot)
             {
                 lock (this.syncRoot)
@@ -50,13 +51,12 @@ namespace T.Serv
                     if (!hash.Contains(webShot.url))
                     {
                         hash.Add(webShot.url, "fetching");
-                        
+
                         queue.Enqueue(webShot);
-                        Console.WriteLine("[{0}] Enqueue: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url);
+                        Console.WriteLine("[{0}] Enqueue({2}): {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url, queue.Count);
                     }
                 }
             }
-
             public void Dequeue()
             {
                 while (true)
@@ -73,7 +73,7 @@ namespace T.Serv
                             }
                         }
 
-                        if (webShot == null) Thread.Sleep(1000);
+                        if (webShot == null) Thread.Sleep(100);
                     }
 
                     webShot.Fetch(30);
@@ -82,17 +82,20 @@ namespace T.Serv
                     {
                         EnqueueSlow(webShot);
                     }
-
-                    hash.Remove(webShot.url);
+                    else
+                    {
+                        hash.Remove(webShot.url);
+                    }
                 }
             }
-
+            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)")]
             public void EnqueueSlow(WebShot webShot)
             {
-                Console.WriteLine("[{0}] EnqueueSlow: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url);
-                slowqueue.Enqueue(webShot);
-            }
+                hash[webShot.url] = "re-fetching";
 
+                slowqueue.Enqueue(webShot);
+                Console.WriteLine("[{0}] EnqueueSlow({2}): {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url, slowqueue.Count);
+            }
             public void DequeueSlow()
             {
                 while (true)
@@ -106,38 +109,40 @@ namespace T.Serv
                             webShot = slowqueue.Dequeue();
                         }
 
-                        if (webShot == null) Thread.Sleep(1000);
+                        if (webShot == null) Thread.Sleep(100);
                     }
-                    
                     webShot.Fetch(240);
+                    hash.Remove(webShot.url);
                 }
-
-            }
-        }
-
-        public class HttpWorker
-        {
-            private HttpListenerContext context;
-            public static QueueWorker queueworker;
-                    
-            public HttpWorker(HttpListenerContext context)
-            {
-                this.context = context;
             }
 
-            public void Handle()
+            public class HttpWorker
             {
-                Console.Write(".");
+                private HttpListenerContext context;
+                public static QueueWorker queueworker;
 
-                if (context.Request.QueryString.Count == 0) //root
+                public HttpWorker(HttpListenerContext context)
                 {
-                    StreamWriter writer = new StreamWriter(context.Response.OutputStream);
-                    writer.Write("/");
-                    writer.Close();
-                    return;
+                    this.context = context;
                 }
-                try
+
+                public void Handle()
                 {
+                    Console.Write(".");
+
+                    if (context.Request.QueryString.Count == 0) //root
+                    {
+                        StreamWriter writer = new StreamWriter(context.Response.OutputStream);
+                        writer.Write("/");
+                        writer.Close();
+                        return;
+                    }
+
+                    if (context.Request.QueryString["xorbitmap"] == "true")
+                    {
+                        WebShot.XorBitmap(context.Response.OutputStream, 512, 512);
+                    }
+                                        
                     WebShot webShot = new WebShot(context.Request.RawUrl);
 
                     if (webShot.url != null && !webShot.isReady)
@@ -146,71 +151,42 @@ namespace T.Serv
                     }
 
                     webShot.Save(context.Response.OutputStream);
-                   
-                    context.Response.OutputStream.Close();
-                    context.Response.Close();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine("Error: " + e.Message + e.StackTrace);
-                }
 
-                return;
-            }
-
-            static bool WriteToStream(Stream output, string fileName)
-            {
-                int bytesRead;
-                byte[] buffer = new byte[4096];
-                FileStream fs = null;
-
-                if (!File.Exists(fileName)) return false;
-
-                try
-                {
-                    fs = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    long count = fs.Length;
-
-                    while ((bytesRead = fs.Read(buffer, 0, (int)(count > 4096 ? 4096 : count))) > 0)
+                    try
                     {
-                        try
-                        {
-                            output.Write(buffer, 0, bytesRead);
-                        }
-                        catch (System.Net.HttpListenerException)
-                        {   // client closed connection
-                            // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
-                            // 2. ErrorCode=64. The specified network name is no longer available.
-                            return true;
-                        }
-                        count -= bytesRead;
+                        context.Response.OutputStream.Close();
+                        context.Response.Close();
+                    }
+                    catch (ObjectDisposedException)
+                    {
+
                     }
                 }
-                finally
+                [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)"), STAThread]
+                public static void Main(string[] args)
                 {
-                    if (fs != null) fs.Close();
-                }
-                return true;
-            }
+                    HttpListener listener = new HttpListener();
+                    queueworker = new QueueWorker(5);
 
-            public static void Main(string[] args)
-            {
-                HttpListener listener = new HttpListener();
+                    string localprefix = "http://*:" + 8080 + "/";
 
-                queueworker = new QueueWorker(5);
+                    listener.Prefixes.Add(localprefix);
+                    listener.Start();
 
-                string localprefix = "http://*:" + 8080 + "/";
-                                
-                listener.Prefixes.Add(localprefix);
-                listener.Start();
-                                
-                Console.WriteLine("[{0}] T.Serv 1.0b, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
-                while (true)
-                {
-                    HttpListenerContext context = listener.GetContext();
-                    new Thread(new ThreadStart(new HttpWorker(context).Handle)).Start();
+                    DateTime start = DateTime.Now;
+                    Console.WriteLine("[{0}] T.Serv 3.3, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
+                                        
+                    while (true)
+                    {
+                        HttpListenerContext context = listener.GetContext();
+                        new Thread(new ThreadStart(new HttpWorker(context).Handle)).Start();
+
+                        TimeSpan span = DateTime.Now - start;
+                        if (span.Hours > 1) System.Environment.Exit(-1);
+                    }
                 }
             }
         }
     }
 }
+
