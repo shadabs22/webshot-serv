@@ -1,1 +1,3 @@
-[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", Scope = "member", Target = "GetSiteThumbnail.WebShot..ctor(System.String)")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Scope = "member", Target = "Gif.Components.GifDecoder.SetPixels(System.Int32[]):System.Void", MessageId = "height")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Scope = "member", Target = "Gif.Components.GifDecoder.SetPixels(System.Int32[]):System.Void", MessageId = "pixels")]
+[assembly: System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1500:VariableNamesShouldNotMatchFieldNames", Scope = "member", Target = "Gif.Components.GifDecoder.SetPixels(System.Int32[]):System.Void", MessageId = "width")]
