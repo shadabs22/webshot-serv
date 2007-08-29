@@ -11,12 +11,82 @@ using System.Windows.Forms;
 using System.ComponentModel;
 using System.Web;
 using System.Runtime.InteropServices;
+using System.Xml;
+using System.Diagnostics;
 
 [assembly: CLSCompliant(true)]
 namespace T.Serv
 {
     class WebShotServer
     {
+        public static XmlInfo xi = new XmlInfo();
+
+        public class XmlInfo
+        {
+            private ArrayList processortimes = new ArrayList();
+            private ArrayList requests = new ArrayList();
+
+            public XmlInfo()
+            {
+                new Thread(new ThreadStart(this.Handle)).Start();
+            }
+
+            public void AddRequest(string req)
+            {
+                requests.Add(req);
+                if (requests.Count > 30) requests.RemoveAt(0);
+            }
+
+            public void Fetch(XmlDocument doc)
+            {
+                 XmlElement main, newnode, child;
+                 
+                 main = doc.CreateElement("SystemInfo");
+
+                 newnode = doc.CreateElement("Processor");
+                 foreach(float i in processortimes)
+                 {
+                     child = doc.CreateElement("Value");
+                     child.InnerText = i.ToString();
+                     newnode.AppendChild(child);
+                 }
+                 main.AppendChild(newnode);
+
+                 newnode = doc.CreateElement("Memory");
+
+                 PerformanceCounter ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+                 child = doc.CreateElement("Value");
+                 child.InnerText = ramCounter.NextValue().ToString();
+                 newnode.AppendChild(child);
+                 ramCounter.Close();
+                 
+                 main.AppendChild(newnode);
+                
+                 newnode = doc.CreateElement("Requests");
+                 foreach (string i in requests)
+                 {
+                     child = doc.CreateElement("Value");
+                     child.InnerText = i.ToString();
+                     newnode.AppendChild(child);
+                 }
+                 main.AppendChild(newnode);
+
+                 doc.DocumentElement.AppendChild(main);
+            }
+            
+            private void Handle()
+            {
+                PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+
+                while(true)
+                {
+                    processortimes.Add(cpuCounter.NextValue());
+                    if (processortimes.Count > 30) processortimes.RemoveAt(0);
+                    Thread.Sleep(1000);
+                }
+            }
+        }
+
         public class QueueWorker
         {
             private readonly object syncRoot;
@@ -43,7 +113,6 @@ namespace T.Serv
                 thread.Priority = ThreadPriority.BelowNormal;
                 thread.Start();
             }
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)")]
             public void Enqueue(WebShot webShot)
             {
                 lock (this.syncRoot)
@@ -88,7 +157,6 @@ namespace T.Serv
                     }
                 }
             }
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)")]
             public void EnqueueSlow(WebShot webShot)
             {
                 hash[webShot.url] = "re-fetching";
@@ -130,27 +198,71 @@ namespace T.Serv
                 {
                     Console.Write(".");
 
-                    if (context.Request.QueryString.Count == 0) //root
+                    if (!String.IsNullOrEmpty(context.Request.QueryString["url"]))
                     {
-                        StreamWriter writer = new StreamWriter(context.Response.OutputStream);
-                        writer.Write("/");
-                        writer.Close();
-                        return;
+                        xi.AddRequest(context.Request.RawUrl);
+
+                        WebShot webShot = new WebShot(context.Request.QueryString);
+                                            
+                        if (webShot.url != null)
+                        {
+                            if (webShot.isExpired || !webShot.isReady) queueworker.Enqueue(webShot);
+
+                            if (queueworker.queue.Count <= 1)
+                            {
+                                DateTime start = DateTime.Now;
+                                while (!webShot.isReady)
+                                {
+                                    TimeSpan span = DateTime.Now - start;
+                                    if (span.Seconds > 3) break;
+                                    Thread.Sleep(100);
+                                }
+                            }
+                        }
+
+                        if (!webShot.isReady)
+                        {
+                            webShot.WaitShotToStream(context.Response.OutputStream);
+                        }
+                        else
+                        {
+                            webShot.WebShotToStream(context.Response.OutputStream);
+                        }
+                    } 
+                    else if (context.Request.QueryString["xorbitmap"] == "true")
+                    {
+                        WebShot.XorBitmapToStream(context.Response.OutputStream);
+                    } 
+                    else
+                    {
+                        if (File.Exists("." + context.Request.RawUrl))
+                        {
+                            //context.Response.ContentType = "image/gif";
+                            BinaryWriter binWriter = new BinaryWriter(context.Response.OutputStream);
+                            BinaryReader binReader = new BinaryReader(File.Open("." + context.Request.RawUrl, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+
+                            binWriter.Write(binReader.ReadBytes((int)binReader.BaseStream.Length));
+
+                            binWriter.Close();
+                            binReader.Close();
+                        }
+                        else
+                        {
+                            context.Response.ContentType = "text/xml";
+
+                            XmlDocument doc = new XmlDocument();
+
+                            //doc.Load(new XmlTextReader("./index.xml"));
+
+                            doc.Load(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet type=\"text/xsl\" href=\"index.xsl\"?><root><version>1.0</version><author>Telrik</author></root>"));
+
+                            xi.Fetch(doc);
+                          
+                            doc.Save(context.Response.OutputStream);
+                        }
                     }
 
-                    if (context.Request.QueryString["xorbitmap"] == "true")
-                    {
-                        WebShot.XorBitmap(context.Response.OutputStream, 512, 512);
-                    }
-                                        
-                    WebShot webShot = new WebShot(context.Request.RawUrl);
 
-                    if (webShot.url != null && !webShot.isReady)
-                    {
-                        queueworker.Enqueue(webShot);
-                    }
-
-                    webShot.Save(context.Response.OutputStream);
 
                     try
                     {
@@ -158,13 +270,13 @@ namespace T.Serv
                         context.Response.Close();
                     }
                     catch (ObjectDisposedException)
-                    {
-
-                    }
+                    {  }
                 }
-                [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)"), STAThread]
+                
+                [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "args"), STAThread]
                 public static void Main(string[] args)
                 {
+                    xi = new XmlInfo();
                     HttpListener listener = new HttpListener();
                     queueworker = new QueueWorker(5);
 
@@ -174,7 +286,7 @@ namespace T.Serv
                     listener.Start();
 
                     DateTime start = DateTime.Now;
-                    Console.WriteLine("[{0}] T.Serv 3.3, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
+                    Console.WriteLine("[{0}] T.Serv 5.9d.b, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
                                         
                     while (true)
                     {
@@ -182,11 +294,12 @@ namespace T.Serv
                         new Thread(new ThreadStart(new HttpWorker(context).Handle)).Start();
 
                         TimeSpan span = DateTime.Now - start;
-                        if (span.Hours > 1) System.Environment.Exit(-1);
+                        if (span.Hours > 3) System.Environment.Exit(-1);
                     }
                 }
             }
         }
+
     }
 }
 

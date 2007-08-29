@@ -13,12 +13,13 @@ using System.Net;
 using System.Web;
 using System.Text;
 using FastImage;
+using Gif.Components;
+using System.Resources;
 
 namespace GetSiteThumbnail
 {
     class WebShot
     {
-        private Bitmap docImage;
         private Bitmap docThumbnail;
         private Graphics gfx;
 
@@ -28,9 +29,6 @@ namespace GetSiteThumbnail
         private int thumbwidth = 160;
         private int thumbheight = 96;
 
-        private int shadowSize = 5;
-        private int shadowMargin = 2;
-
         public static int width = 1600;
         public static int height = 960;
               
@@ -38,22 +36,21 @@ namespace GetSiteThumbnail
         public string url;
         public bool isReady;
         public bool isTimeout;
-   
-        public WebShot(string url)
+        public bool isExpired;
+        
+        public WebShot(NameValueCollection q)
         {
-            try
-            {
-                int val;
-                NameValueCollection q = HttpUtility.ParseQueryString(url.Replace("/?", "").Replace("http://", ""));
-
                 //Качество
                 codecParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 90L);
-
-                //Целая картинка
-                docImage = new Bitmap(width, height);
-                
-                if (int.TryParse(q["w"], out val)) thumbwidth = val;
-                if (int.TryParse(q["h"], out val)) thumbheight = val;
+                           
+                //Размеры тамбнейла
+                try
+                {
+                    thumbwidth = int.Parse(q["w"]);
+                    thumbheight = int.Parse(q["h"]);
+                }
+                catch
+                {  }
 
                 //Уменьшенная картинка
                 docThumbnail = new Bitmap(thumbwidth, thumbheight);
@@ -62,51 +59,65 @@ namespace GetSiteThumbnail
                 gfx.CompositingQuality = CompositingQuality.HighQuality;
                 gfx.SmoothingMode = SmoothingMode.HighQuality;
                 gfx.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                                
-                Uri uri = new Uri("http://" + q["url"].Replace("http://", ""));
-
-                //Имя файла в кеше
-                fileName = "./webshots/" + uri.ToString().Replace("http://", "").Replace("/", "_").Replace("\\", "_") + "_" + thumbwidth + "x" + thumbheight + ".png";
                 
-                FileInfo file = new FileInfo(fileName);
-                TimeSpan span = DateTime.Now - file.CreationTime;
+                gfx.Clear(Color.White);
 
-                if (file.Exists && span.TotalDays <= 7 && q["force"] != "true")
-                {
-                    docThumbnail = new Bitmap(file.ToString(), true);
-                    isReady = true;
-                    return;
-                }
-                
                 try
                 {
-                    //Проверка ресурса на доступность
-                    //HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(uri);
-                    //httpRequest.Method = "HEAD";
-                    //httpRequest.GetResponse();
+                    Uri uri = new Uri("http://" + q["url"].Replace("http://", ""));
+
+                    //Имя файла в кеше
+                    fileName = "./webshots/" + uri.ToString().Replace("http://", "").Replace("/", "_").Replace("\\", "_").Replace("?", "_") + "_" + thumbwidth + "x" + thumbheight + ".png";
+                    
+                    FileInfo file = new FileInfo(fileName);
+                    TimeSpan span = DateTime.Now - file.LastWriteTime;
+
+                    if (file.Exists)
+                    {
+                        if (span.TotalDays > 3)
+                        {
+                            isExpired = true;
+                        }
+
+                        BinaryReader binReader = new BinaryReader(File.Open(file.ToString(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                        docThumbnail = new Bitmap(binReader.BaseStream);
+                        binReader.Close();
+
+                        isReady = true;
+                    }
 
                     this.url = uri.ToString(); 
-                }
-                catch (WebException)
+                }   
+                catch
                 {
-                    gfx.FillRectangle(new HatchBrush(HatchStyle.DiagonalBrick, Color.AntiqueWhite, Color.White), new Rectangle(0, 0, thumbwidth, thumbheight));
+                    gfx.FillRectangle(new HatchBrush(HatchStyle.HorizontalBrick, Color.AntiqueWhite, Color.White), new Rectangle(0, 0, thumbwidth, thumbheight));
                 }
-            }   
-            catch (Exception)
-            {
-                gfx.FillRectangle(new HatchBrush(HatchStyle.HorizontalBrick, Color.AntiqueWhite, Color.White), new Rectangle(0, 0, thumbwidth, thumbheight));
-            }
         }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)")]
         public void Fetch(int timeout)
         {
+            /*
+            //Проверка ресурса на доступность
+            HttpWebRequest httpRequest = (HttpWebRequest)WebRequest.Create(new Uri(url));
+            //httpRequest.Method = "HEAD";
+
+            HttpWebResponse httpResponse = (HttpWebResponse)httpRequest.GetResponse();
+            StreamReader readStream = new StreamReader(httpResponse.GetResponseStream());
+
+            this.docSize = readStream.ReadToEnd().Length;
+
+            httpResponse.Close();
+            readStream.Close();
+            */
+           
+            
             WebBrowser webBrowser = new WebBrowser();
             try
             {
-                webBrowser.Size = new Size(WebShot.width, WebShot.height);
+                webBrowser.Size = new Size(width, height);
                 webBrowser.ScrollBarsEnabled = false;
                 webBrowser.ScriptErrorsSuppressed = true;
                 webBrowser.DocumentCompleted += new WebBrowserDocumentCompletedEventHandler(documentCompletedEventHandler);
+                webBrowser.ProgressChanged += new WebBrowserProgressChangedEventHandler(documentProgressChangedEventHandler);
                 webBrowser.NewWindow += new CancelEventHandler(documentCancelEventHandler);
 
                 Console.WriteLine("[{0}] Fetch: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), url);
@@ -133,10 +144,49 @@ namespace GetSiteThumbnail
                 webBrowser.Dispose();
                 GC.Collect();
             }
-
+                        
             Save();
         }
-        public void Save(Stream output)
+        public void WaitShotToStream(Stream output)
+        {
+            GifDecoder gifDecoder = new GifDecoder();
+ 
+            AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
+            MemoryStream outStream = new MemoryStream();
+
+            gifEncoder.SetFrameRate(10);
+            gifEncoder.SetDelay(100);
+            gifEncoder.SetRepeat(0);
+            gifEncoder.SetTransparent(Color.Black);
+
+            gifEncoder.Start(outStream);
+            
+            ResourceManager rm = new ResourceManager("webshot.serv.Properties.Resources", System.Reflection.Assembly.GetExecutingAssembly());
+            gifDecoder.Read(rm.GetStream("ajax_loader"));
+            
+            for (int i = 0, count = gifDecoder.GetFrameCount(); i < count; i++)
+            {
+                gifEncoder.AddFrame(gifDecoder.GetFrame(i), thumbwidth, thumbheight);
+            }
+            gifEncoder.Finish();
+                        
+            byte[] buffer = outStream.ToArray();
+
+            try
+            {
+                output.Write(buffer, 0, buffer.Length);
+            }
+            catch (System.Net.HttpListenerException)
+            {
+                // client closed connection
+                // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
+                // 2. ErrorCode=64. The specified network name is no longer available.
+            }
+
+            outStream.Dispose();
+        }
+
+        public void WebShotToStream(Stream output)
         {
             if (docThumbnail == null) return;
 
@@ -158,19 +208,26 @@ namespace GetSiteThumbnail
 
             stream.Dispose();
         }
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1305:SpecifyIFormatProvider", MessageId = "System.DateTime.ToString(System.String)")]
         private void Save()
         {
             try
             {
                 Directory.CreateDirectory(Path.GetDirectoryName(this.fileName));
-                docThumbnail.Save(this.fileName, this.codec, this.codecParams);
+                FileStream fs = new FileStream(this.fileName, FileMode.Create, FileAccess.Write, FileShare.Read);
+                docThumbnail.Save(fs, this.codec, this.codecParams);
+                fs.Close();
+                
                 Console.WriteLine("[{0}] Save: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), this.fileName);
             }
             catch (ExternalException)
-            {
-
-            }
+            {  }
+        }
+        private void documentProgressChangedEventHandler(object sender, WebBrowserProgressChangedEventArgs e)
+        {
+            //WebBrowser webBrowser = sender as WebBrowser;
+            //Font fnt = new Font("Tahoma", 11);
+            //gfx.DrawString((int)(((double)webBrowser.DocumentStream.Length / (double)this.docSize) * 100) + "%", fnt, new SolidBrush(Color.Black), 10,10);
+            //Console.WriteLine((int)(((double)webBrowser.DocumentStream.Length / (double)this.docSize) * 100) + "%, " + (int)(((double)e.CurrentProgress / (double)e.MaximumProgress) * 100)+"%");
         }
         private void documentCancelEventHandler(object sender, CancelEventArgs e)
         {
@@ -179,57 +236,66 @@ namespace GetSiteThumbnail
         }
         private void documentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs ex)
         {
+            int shadowSize = 5;
+            int shadowMargin = 2;
+
             WebBrowser webBrowser = sender as WebBrowser;
 
-            webBrowser.DrawToBitmap(docImage, new Rectangle(0, 0, width, height));
-            gfx.Clear(Color.White);
+            if (webBrowser.Document.Url.ToString().IndexOf("shdoclc.dll") == -1)
+            {
+                //Целая картинка
+                Bitmap docImage = new Bitmap(width, height);
 
-            //Shadow
-            gfx.DrawImage(docImage,
-                          new Rectangle(0, 0, thumbwidth - (shadowSize + 2), thumbheight - (shadowSize + 2)),
-                          new Rectangle(0, 0, width, height),
-                          GraphicsUnit.Pixel
-                         );
+                webBrowser.DrawToBitmap(docImage, new Rectangle(0, 0, width, height));
+                gfx.DrawImage(docImage, new Rectangle(0, 0, thumbwidth - (shadowSize + 2), thumbheight - (shadowSize + 2)),new Rectangle(0, 0, width, height),GraphicsUnit.Pixel);
+            }
+            else
+            {
+                gfx.FillRectangle(new HatchBrush(HatchStyle.DiagonalBrick, Color.AntiqueWhite, Color.White), new Rectangle(0, 0, thumbwidth - (shadowSize + 2), thumbheight - (shadowSize + 2)));
+            }
 
-            // Create tiled brushes for the shadow on the right and at the bottom.
-            TextureBrush shadowRightBrush = new TextureBrush(webshot.serv.Properties.Resources.tshadowright, WrapMode.Tile);
-            TextureBrush shadowDownBrush = new TextureBrush(webshot.serv.Properties.Resources.tshadowdown, WrapMode.Tile);
+            if (!isReady)
+            {
+                // Create tiled brushes for the shadow on the right and at the bottom.
+                TextureBrush shadowRightBrush = new TextureBrush(webshot.serv.Properties.Resources.tshadowright, WrapMode.Tile);
+                TextureBrush shadowDownBrush = new TextureBrush(webshot.serv.Properties.Resources.tshadowdown, WrapMode.Tile);
 
-            // Translate (move) the brushes so the top or left of the image matches the top or left of the
-            // area where it's drawed. If you don't understand why this is necessary, comment it out. 
-            // Hint: The tiling would start at 0,0 of the control, so the shadows will be offset a little.
-            shadowDownBrush.TranslateTransform(0, thumbheight - shadowSize);
-            shadowRightBrush.TranslateTransform(thumbwidth - shadowSize, 0);
+                // Translate (move) the brushes so the top or left of the image matches the top or left of the
+                // area where it's drawed. If you don't understand why this is necessary, comment it out. 
+                // Hint: The tiling would start at 0,0 of the control, so the shadows will be offset a little.
+                shadowDownBrush.TranslateTransform(0, thumbheight - shadowSize);
+                shadowRightBrush.TranslateTransform(thumbwidth - shadowSize, 0);
 
-            // Define the rectangles that will be filled with the brush.
-            // (where the shadow is drawn)
-            Rectangle shadowDownRectangle = 
-                new Rectangle(shadowSize + shadowMargin, thumbheight - shadowSize, thumbwidth - (shadowSize * 2 + shadowMargin), shadowSize);
-            Rectangle shadowRightRectangle = 
-                new Rectangle(thumbwidth - shadowSize, shadowSize + shadowMargin, shadowSize, thumbheight - (shadowSize * 2 + shadowMargin));
+                // Define the rectangles that will be filled with the brush.
+                // (where the shadow is drawn)
+                Rectangle shadowDownRectangle =
+                    new Rectangle(shadowSize + shadowMargin, thumbheight - shadowSize, thumbwidth - (shadowSize * 2 + shadowMargin), shadowSize);
+                Rectangle shadowRightRectangle =
+                    new Rectangle(thumbwidth - shadowSize, shadowSize + shadowMargin, shadowSize, thumbheight - (shadowSize * 2 + shadowMargin));
 
-            // And draw the shadow on the right and at the bottom.
-            gfx.FillRectangle(shadowDownBrush, shadowDownRectangle);
-            gfx.FillRectangle(shadowRightBrush, shadowRightRectangle);
+                // And draw the shadow on the right and at the bottom.
+                gfx.FillRectangle(shadowDownBrush, shadowDownRectangle);
+                gfx.FillRectangle(shadowRightBrush, shadowRightRectangle);
 
-            // Now for the corners, draw the 3 5x5 pixel images.
-            gfx.DrawImage(webshot.serv.Properties.Resources.tshadowtopright, 
-                new Rectangle(thumbwidth - shadowSize, shadowMargin, shadowSize, shadowSize));
+                // Now for the corners, draw the 3 5x5 pixel images.
+                gfx.DrawImage(webshot.serv.Properties.Resources.tshadowtopright,
+                    new Rectangle(thumbwidth - shadowSize, shadowMargin, shadowSize, shadowSize));
 
-            gfx.DrawImage(webshot.serv.Properties.Resources.tshadowdownright, 
-                new Rectangle(thumbwidth - shadowSize, thumbheight - shadowSize, shadowSize, shadowSize));
-            
-            gfx.DrawImage(webshot.serv.Properties.Resources.tshadowdownleft, 
-                new Rectangle(shadowMargin, thumbheight - shadowSize, shadowSize, shadowSize));
+                gfx.DrawImage(webshot.serv.Properties.Resources.tshadowdownright,
+                    new Rectangle(thumbwidth - shadowSize, thumbheight - shadowSize, shadowSize, shadowSize));
 
-            shadowRightBrush.Dispose();
-            shadowDownBrush.Dispose();
+                gfx.DrawImage(webshot.serv.Properties.Resources.tshadowdownleft,
+                    new Rectangle(shadowMargin, thumbheight - shadowSize, shadowSize, shadowSize));
+
+                shadowRightBrush.Dispose();
+                shadowDownBrush.Dispose();
+            }
 
             isReady = true;
         }
-        public static void XorBitmap(Stream output, int w, int h)
+        public static void XorBitmapToStream(Stream output)
         {
-            Bitmap XorBitmap = new Bitmap(w, h);
+            Bitmap XorBitmap = new Bitmap(512, 512);
             FastBitmap FBitmap = new FastBitmap(XorBitmap);
 
             for (int x = 0; x < XorBitmap.Width; x++)
