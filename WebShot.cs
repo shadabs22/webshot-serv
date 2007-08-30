@@ -34,9 +34,13 @@ namespace GetSiteThumbnail
               
         private string fileName;
         public string url;
-        public bool isReady;
-        public bool isTimeout;
-        public bool isExpired;
+
+        public byte ReadyState;
+
+        public const byte wsNotReady = 0;
+        public const byte wsReady = 1;
+        public const byte wsExpired = 2;
+        public const byte wsTimeout = 3;
         
         public WebShot(NameValueCollection q)
         {
@@ -74,16 +78,18 @@ namespace GetSiteThumbnail
 
                     if (file.Exists)
                     {
-                        if (span.TotalDays > 3)
-                        {
-                            isExpired = true;
-                        }
-
                         BinaryReader binReader = new BinaryReader(File.Open(file.ToString(), FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
                         docThumbnail = new Bitmap(binReader.BaseStream);
                         binReader.Close();
 
-                        isReady = true;
+                        if (span.TotalDays > 3)
+                        {
+                            ReadyState = wsExpired;
+                        }
+                        else
+                        {
+                            ReadyState = wsReady;
+                        }
                     }
 
                     this.url = uri.ToString(); 
@@ -109,9 +115,7 @@ namespace GetSiteThumbnail
             readStream.Close();
             */
            
-            
-            WebBrowser webBrowser = new WebBrowser();
-            try
+            using(WebBrowser webBrowser = new WebBrowser())
             {
                 webBrowser.Size = new Size(width, height);
                 webBrowser.ScrollBarsEnabled = false;
@@ -120,7 +124,15 @@ namespace GetSiteThumbnail
                 webBrowser.ProgressChanged += new WebBrowserProgressChangedEventHandler(documentProgressChangedEventHandler);
                 webBrowser.NewWindow += new CancelEventHandler(documentCancelEventHandler);
 
-                Console.WriteLine("[{0}] Fetch: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), url);
+                if (ReadyState == wsNotReady)
+                {
+                    Console.Write("f");
+                }
+                if (ReadyState == wsExpired)
+                {
+                    Console.Write("u");
+                }
+                //Console.WriteLine("[{0}] Fetch: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), url);
 
                 webBrowser.Navigate(url, false);
 
@@ -134,20 +146,15 @@ namespace GetSiteThumbnail
 
                     if (span.Seconds >= timeout)
                     {
-                        isTimeout = true;
+                        ReadyState = wsTimeout;
                         break;
                     }
                 }
             }
-            finally
-            {
-                webBrowser.Dispose();
-                GC.Collect();
-            }
                         
             Save();
         }
-        public void WaitShotToStream(Stream output)
+        public byte[] GetWaitShot()
         {
             GifDecoder gifDecoder = new GifDecoder();
  
@@ -168,45 +175,22 @@ namespace GetSiteThumbnail
             {
                 gifEncoder.AddFrame(gifDecoder.GetFrame(i), thumbwidth, thumbheight);
             }
+
             gifEncoder.Finish();
-                        
+
             byte[] buffer = outStream.ToArray();
 
-            try
-            {
-                output.Write(buffer, 0, buffer.Length);
-            }
-            catch (System.Net.HttpListenerException)
-            {
-                // client closed connection
-                // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
-                // 2. ErrorCode=64. The specified network name is no longer available.
-            }
+            outStream.Close();
 
-            outStream.Dispose();
+            return buffer;
         }
-
-        public void WebShotToStream(Stream output)
+        public byte[] GetWebShot()
         {
-            if (docThumbnail == null) return;
-
             MemoryStream stream = new MemoryStream();
             docThumbnail.Save(stream, codec, codecParams);
-            
             byte[] buffer = stream.ToArray();
-
-            try
-            {
-                 output.Write(buffer, 0, buffer.Length);
-            }
-            catch (System.Net.HttpListenerException)
-            {   
-                // client closed connection
-                // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
-                // 2. ErrorCode=64. The specified network name is no longer available.
-            }
-
-            stream.Dispose();
+            stream.Close();
+            return buffer;
         }
         private void Save()
         {
@@ -217,7 +201,8 @@ namespace GetSiteThumbnail
                 docThumbnail.Save(fs, this.codec, this.codecParams);
                 fs.Close();
                 
-                Console.WriteLine("[{0}] Save: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), this.fileName);
+                //Console.WriteLine("[{0}] Save: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), this.fileName);
+                Console.Write("s");
             }
             catch (ExternalException)
             {  }
@@ -254,7 +239,7 @@ namespace GetSiteThumbnail
                 gfx.FillRectangle(new HatchBrush(HatchStyle.DiagonalBrick, Color.AntiqueWhite, Color.White), new Rectangle(0, 0, thumbwidth - (shadowSize + 2), thumbheight - (shadowSize + 2)));
             }
 
-            if (!isReady)
+            if (ReadyState != wsReady)
             {
                 // Create tiled brushes for the shadow on the right and at the bottom.
                 TextureBrush shadowRightBrush = new TextureBrush(webshot.serv.Properties.Resources.tshadowright, WrapMode.Tile);
@@ -291,9 +276,9 @@ namespace GetSiteThumbnail
                 shadowDownBrush.Dispose();
             }
 
-            isReady = true;
+            ReadyState = wsReady;
         }
-        public static void XorBitmapToStream(Stream output)
+        public static byte[] GetXorBitmap()
         {
             Bitmap XorBitmap = new Bitmap(512, 512);
             FastBitmap FBitmap = new FastBitmap(XorBitmap);
@@ -319,19 +304,10 @@ namespace GetSiteThumbnail
 
             byte[] buffer = stream.ToArray();
 
-            try
-            {
-                output.Write(buffer, 0, buffer.Length);
-            }
-            catch (System.Net.HttpListenerException)
-            {   
-                // client closed connection
-                // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
-                // 2. ErrorCode=64. The specified network name is no longer available.
-            }
-
-            stream.Dispose();
+            stream.Close();
             codecParams.Dispose();
+
+            return buffer;
         }
         private static ImageCodecInfo GetEncoderInfo(String mimeType)
         {
