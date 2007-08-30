@@ -8,11 +8,22 @@
      <Namespaces>
       <Namespace Name="T.Serv">
        <Types>
+        <Type Name="WebShotServer+QueueWorker+HttpWorker" Kind="Class" Accessibility="Public" ExternallyVisible="False">
+         <Members>
+          <Member Name="ResponseWrite(System.String):System.Void" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="DisposeObjectsBeforeLosingScope" Category="Microsoft.Reliability" CheckId="CA2000" Status="Active" Created="2007-08-30 09:45:38Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov\Рабочий стол\webshot.serv" File="Program.cs" Line="234">Modify HttpWorker.ResponseWrite(String):Void to dispose local 'binReader' of type 'BinaryReader' for all code paths.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
         <Type Name="WebShotServer+XmlInfo" Kind="Class" Accessibility="Public" ExternallyVisible="False">
          <Members>
           <Member Name="Fetch(System.Xml.XmlDocument):System.Void" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="False">
            <Messages>
-            <Message TypeName="DisposeObjectsBeforeLosingScope" Category="Microsoft.Reliability" CheckId="CA2000" Status="Active" Created="2007-08-29 14:48:36Z" FixCategory="NonBreaking">
+            <Message TypeName="DisposeObjectsBeforeLosingScope" Category="Microsoft.Reliability" CheckId="CA2000" Status="Active" Created="2007-08-30 09:45:38Z" FixCategory="NonBreaking">
              <Issue Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov\Рабочий стол\webshot.serv" File="Program.cs" Line="75">Modify XmlInfo.Fetch(XmlDocument):Void to dispose local 'ramCounter' of type 'PerformanceCounter' for all code paths.</Issue>
             </Message>
            </Messages>

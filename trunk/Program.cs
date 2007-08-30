@@ -105,6 +105,7 @@ namespace T.Serv
                     thread = new Thread(new ThreadStart(this.Dequeue));
                     thread.SetApartmentState(ApartmentState.STA);
                     thread.Priority = ThreadPriority.Normal;
+                    thread.Name = "qw_" + i;
                     thread.Start();
                 }
 
@@ -122,7 +123,8 @@ namespace T.Serv
                         hash.Add(webShot.url, "fetching");
 
                         queue.Enqueue(webShot);
-                        Console.WriteLine("[{0}] Enqueue({2}): {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url, queue.Count);
+                        //Console.WriteLine("[{0}] Enqueue({2}): {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url, queue.Count);
+                        Console.Write("e[{0}]", queue.Count);
                     }
                 }
             }
@@ -143,11 +145,13 @@ namespace T.Serv
                         }
 
                         if (webShot == null) Thread.Sleep(100);
+
+                        //Console.WriteLine(Thread.CurrentThread.Name + " alive?");
                     }
 
                     webShot.Fetch(30);
 
-                    if (webShot.isTimeout)
+                    if (webShot.ReadyState == WebShot.wsTimeout)
                     {
                         EnqueueSlow(webShot);
                     }
@@ -162,7 +166,9 @@ namespace T.Serv
                 hash[webShot.url] = "re-fetching";
 
                 slowqueue.Enqueue(webShot);
-                Console.WriteLine("[{0}] EnqueueSlow({2}): {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url, slowqueue.Count);
+                //Console.WriteLine("[{0}] EnqueueSlow({2}): {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), webShot.url, slowqueue.Count);
+
+                Console.Write("es[{0}]", slowqueue.Count);
             }
             public void DequeueSlow()
             {
@@ -194,6 +200,39 @@ namespace T.Serv
                     this.context = context;
                 }
 
+                public void ResponseWrite(XmlDocument doc)
+                {
+                    try
+                    {
+                        doc.Save(context.Response.OutputStream);
+                    }
+                    catch (System.Net.HttpListenerException)
+                    {
+                        // client closed connection
+                        // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
+                        // 2. ErrorCode=64. The specified network name is no longer available.
+                    }
+                }
+                public void ResponseWrite(byte[] buffer)
+                {
+                    try
+                    {
+                        context.Response.OutputStream.Write(buffer, 0, buffer.Length);
+                    }
+                    catch (System.Net.HttpListenerException)
+                    {
+                        // client closed connection
+                        // 1. ErrorCode=1229. An operation was attempted on a nonexistent network connection.
+                        // 2. ErrorCode=64. The specified network name is no longer available.
+                    }
+                }
+                public void ResponseWrite(string fileName)
+                {
+                    BinaryReader binReader = new BinaryReader(File.Open(fileName, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                    ResponseWrite(binReader.ReadBytes((int)binReader.BaseStream.Length));
+                    binReader.Close();
+                }
+
                 public void Handle()
                 {
                     Console.Write(".");
@@ -206,12 +245,12 @@ namespace T.Serv
                                             
                         if (webShot.url != null)
                         {
-                            if (webShot.isExpired || !webShot.isReady) queueworker.Enqueue(webShot);
+                            if (webShot.ReadyState != WebShot.wsReady) queueworker.Enqueue(webShot);
 
                             if (queueworker.queue.Count <= 1)
                             {
                                 DateTime start = DateTime.Now;
-                                while (!webShot.isReady)
+                                while (webShot.ReadyState == WebShot.wsNotReady)
                                 {
                                     TimeSpan span = DateTime.Now - start;
                                     if (span.Seconds > 3) break;
@@ -220,31 +259,24 @@ namespace T.Serv
                             }
                         }
 
-                        if (!webShot.isReady)
+                        if (webShot.ReadyState != WebShot.wsNotReady)
                         {
-                            webShot.WaitShotToStream(context.Response.OutputStream);
-                        }
+                            ResponseWrite(webShot.GetWebShot());
+                         }
                         else
                         {
-                            webShot.WebShotToStream(context.Response.OutputStream);
+                            ResponseWrite(webShot.GetWaitShot());
                         }
                     } 
                     else if (context.Request.QueryString["xorbitmap"] == "true")
                     {
-                        WebShot.XorBitmapToStream(context.Response.OutputStream);
+                        ResponseWrite(WebShot.GetXorBitmap());
                     } 
                     else
                     {
                         if (File.Exists("." + context.Request.RawUrl))
                         {
-                            //context.Response.ContentType = "image/gif";
-                            BinaryWriter binWriter = new BinaryWriter(context.Response.OutputStream);
-                            BinaryReader binReader = new BinaryReader(File.Open("." + context.Request.RawUrl, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
-
-                            binWriter.Write(binReader.ReadBytes((int)binReader.BaseStream.Length));
-
-                            binWriter.Close();
-                            binReader.Close();
+                            ResponseWrite("." + context.Request.RawUrl);
                         }
                         else
                         {
@@ -254,16 +286,13 @@ namespace T.Serv
 
                             //doc.Load(new XmlTextReader("./index.xml"));
 
-                            doc.Load(new StringReader("<?xml version=\"1.0\" encoding=\"UTF-8\"?><?xml-stylesheet type=\"text/xsl\" href=\"index.xsl\"?><root><version>1.0</version><author>Telrik</author></root>"));
+                            doc.Load(new StringReader("<?xml version=\"1.0\" encoding=\"utf-8\"?><?xml-stylesheet type=\"text/xsl\" href=\"index.xsl\"?><root><version>1.0</version><author>Telrik</author></root>"));
 
                             xi.Fetch(doc);
-                          
-                            doc.Save(context.Response.OutputStream);
+                            ResponseWrite(doc);
                         }
                     }
-
-
-
+                    
                     try
                     {
                         context.Response.OutputStream.Close();
@@ -286,7 +315,7 @@ namespace T.Serv
                     listener.Start();
 
                     DateTime start = DateTime.Now;
-                    Console.WriteLine("[{0}] T.Serv 5.9d.b, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
+                    Console.WriteLine("[{0}] T.Serv 6.1r, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
                                         
                     while (true)
                     {
