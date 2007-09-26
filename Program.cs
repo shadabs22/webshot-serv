@@ -104,14 +104,14 @@ namespace T.Serv
                 {
                     thread = new Thread(new ThreadStart(this.Dequeue));
                     thread.SetApartmentState(ApartmentState.STA);
-                    thread.Priority = ThreadPriority.Normal;
+                    thread.Priority = ThreadPriority.BelowNormal;
                     thread.Name = "qw_" + i;
                     thread.Start();
                 }
 
                 thread = new Thread(new ThreadStart(this.DequeueSlow));
                 thread.SetApartmentState(ApartmentState.STA);
-                thread.Priority = ThreadPriority.BelowNormal;
+                thread.Priority = ThreadPriority.Lowest;
                 thread.Start();
             }
             public void Enqueue(WebShot webShot)
@@ -247,7 +247,7 @@ namespace T.Serv
                         {
                             if (webShot.ReadyState != WebShot.wsReady) queueworker.Enqueue(webShot);
 
-                            if (queueworker.queue.Count <= 1)
+                            /*if (queueworker.queue.Count <= 1)
                             {
                                 DateTime start = DateTime.Now;
                                 while (webShot.ReadyState == WebShot.wsNotReady)
@@ -256,7 +256,7 @@ namespace T.Serv
                                     if (span.Seconds > 3) break;
                                     Thread.Sleep(100);
                                 }
-                            }
+                            }*/
                         }
 
                         if (webShot.ReadyState != WebShot.wsNotReady)
@@ -298,7 +298,7 @@ namespace T.Serv
                         context.Response.OutputStream.Close();
                         context.Response.Close();
                     }
-                    catch (ObjectDisposedException)
+                    catch
                     {  }
                 }
                 
@@ -315,7 +315,7 @@ namespace T.Serv
                     listener.Start();
 
                     DateTime start = DateTime.Now;
-                    Console.WriteLine("[{0}] T.Serv 6.1r, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
+                    Console.WriteLine("#######\n[{0}] T.Serv 6.2r, HttpListener: {1}", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), localprefix);
                                         
                     while (true)
                     {
