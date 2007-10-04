@@ -1,0 +1,613 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="c:\program files\microsoft visual studio 9.0\team tools\static analysis tools\fxcop\Xml\CodeAnalysisReport.xsl"?>
+<FxCopReport Version="1.36">
+ <Targets>
+  <Target Name="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\bin\Debug\webshot.serv.exe">
+   <Modules>
+    <Module Name="webshot.serv.exe">
+     <Messages>
+      <Message Id="serv" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+       <Issue Name="Assembly" Certainty="85" Level="Error">Correct the casing of 'serv' in assembly name 'webshot.serv' by changing it to 'Serv'.</Issue>
+      </Message>
+      <Message Id="webshot" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+       <Issue Name="Assembly" Certainty="85" Level="Error">Correct the casing of 'webshot' in assembly name 'webshot.serv' by changing it to 'Webshot'.</Issue>
+      </Message>
+      <Message Id="serv" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+       <Issue Name="Assembly" Certainty="75" Level="CriticalWarning">Correct the spelling of 'serv' in assembly name 'webshot.serv'.</Issue>
+      </Message>
+      <Message Id="webshot" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+       <Issue Name="Assembly" Certainty="75" Level="CriticalWarning">Correct the spelling of 'webshot' in assembly name 'webshot.serv'.</Issue>
+      </Message>
+      <Message TypeName="MarkAssembliesWithNeutralResourcesLanguage" Category="Microsoft.Performance" CheckId="CA1824" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+       <Issue Certainty="95" Level="Warning">Because assembly 'webshot.serv' contains a ResX-based resource file, mark it with the NeutralResourcesLanguage attribute, specifying the language of the resources within the assembly. This could improve lookup performance the first time a resource is retrieved.</Issue>
+      </Message>
+     </Messages>
+     <Namespaces>
+      <Namespace Name="FastImage">
+       <Types>
+        <Type Name="FastBitmap" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetPixel(System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="x" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="FastBitmap.cs" Line="80">In method 'FastBitmap.GetPixel(int, int)', consider providing a more meaningful name than parameter name 'x'.</Issue>
+            </Message>
+            <Message Id="y" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="FastBitmap.cs" Line="80">In method 'FastBitmap.GetPixel(int, int)', consider providing a more meaningful name than parameter name 'y'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SetPixel(System.Int32,System.Int32,System.Drawing.Color)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="x" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="FastBitmap.cs" Line="61">In method 'FastBitmap.SetPixel(int, int, Color)', consider providing a more meaningful name than parameter name 'x'.</Issue>
+            </Message>
+            <Message Id="y" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="FastBitmap.cs" Line="61">In method 'FastBitmap.SetPixel(int, int, Color)', consider providing a more meaningful name than parameter name 'y'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+      <Namespace Name="GetSiteThumbnail">
+       <Types>
+        <Type Name="WebShot" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message TypeName="TypeNamesShouldNotMatchNamespaces" Category="Microsoft.Naming" CheckId="CA1724" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+           <Issue Certainty="95" Level="Error">The type name 'WebShot' conflicts in whole or in part with the namespace name 'webshot.serv.Properties'. Change either name to eliminate the conflict.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#DocumentCompletedEventHandler(System.Object,System.Windows.Forms.WebBrowserDocumentCompletedEventArgs)" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message Id="System.String.IndexOf(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder" File="WebShot.cs" Line="218">'WebShot.DocumentCompletedEventHandler(object, WebBrowserDocumentCompletedEventArgs)' makes a call to 'string.IndexOf(string)' that does not explicitly provide a StringComparison. This should be replaced with a call to 'string.IndexOf(string, StringComparison)'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#height" Kind="Field" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Certainty="90" Level="Warning">Consider making 'WebShot.height' non-public or a constant.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#url" Kind="Field" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Certainty="90" Level="Error">Because field 'WebShot.url' is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#width" Kind="Field" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Certainty="90" Level="Warning">Consider making 'WebShot.width' non-public or a constant.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#wsExpired" Kind="Field" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="ws" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error">Correct the casing of 'ws' in member name 'WebShot.wsExpired' by changing it to 'WS'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#wsNotReady" Kind="Field" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="ws" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error">Correct the casing of 'ws' in member name 'WebShot.wsNotReady' by changing it to 'WS'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#wsReady" Kind="Field" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="ws" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error">Correct the casing of 'ws' in member name 'WebShot.wsReady' by changing it to 'WS'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#wsTimeout" Kind="Field" Static="True" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="ws" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error">Correct the casing of 'ws' in member name 'WebShot.wsTimeout' by changing it to 'WS'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="WebShotQueueWorker" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#Dequeue()" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message Id="System.GC.Collect" TypeName="AvoidCallingProblematicMethods" Category="Microsoft.Reliability" CheckId="CA2001" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Name="System.GC.Collect" Certainty="75" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder" File="WebShot.cs" Line="448">Remove the call to GC.Collect from 'WebShotQueueWorker.Dequeue()'. It is usually unnecessary to force garbage collection, and doing so can severely degrade performance.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetQueueStatus(System.Int32)" Kind="Method" Static="True" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Certainty="95" Level="CriticalWarning">Because it is a P/Invoke method, 'WebShotQueueWorker.GetQueueStatus(int)' should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetXml()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="System.Xml.XmlNode" TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Xml" Certainty="75" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder" File="WebShot.cs" Line="323">Modify member 'WebShotQueueWorker.GetXml()' so that it no longer exposes the concrete type 'XmlDocument'. Use IXPathNavigable to represent XML data sources.</Issue>
+            </Message>
+            <Message TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Certainty="50" Level="Warning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder" File="WebShot.cs" Line="323">Change 'WebShotQueueWorker.GetXml()' to a property if appropriate.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#queue" Kind="Field" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Certainty="90" Level="Error">Because field 'WebShotQueueWorker.queue' is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+      <Namespace Name="Gif.Components">
+       <Types>
+        <Type Name="AnimatedGifEncoder" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#AddFrame(System.Drawing.Image,System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="thumbheight" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="147">In method 'AnimatedGifEncoder.AddFrame(Image, int, int)', correct the spelling of 'thumbheight' in parameter name 'thumbheight' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+            <Message Id="thumbwidth" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="147">In method 'AnimatedGifEncoder.AddFrame(Image, int, int)', correct the spelling of 'thumbwidth' in parameter name 'thumbwidth' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#FindClosest(System.Drawing.Color)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="c" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="368">In method 'AnimatedGifEncoder.FindClosest(Color)', consider providing a more meaningful name than parameter name 'c'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SetRepeat(System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="iter" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="112">In method 'AnimatedGifEncoder.SetRepeat(int)', correct the spelling of 'iter' in parameter name 'iter' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SetSize(System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="h" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="267">In method 'AnimatedGifEncoder.SetSize(int, int)', consider providing a more meaningful name than parameter name 'h'.</Issue>
+            </Message>
+            <Message Id="w" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="267">In method 'AnimatedGifEncoder.SetSize(int, int)', consider providing a more meaningful name than parameter name 'w'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SetTransparent(System.Drawing.Color)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="c" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="132">In method 'AnimatedGifEncoder.SetTransparent(Color)', consider providing a more meaningful name than parameter name 'c'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#WriteImageDesc(System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="Desc" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="476">Correct the spelling of 'Desc' in member name 'AnimatedGifEncoder.WriteImageDesc(int, int)' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+            <Message Id="thumbheight" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="476">In method 'AnimatedGifEncoder.WriteImageDesc(int, int)', correct the spelling of 'thumbheight' in parameter name 'thumbheight' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+            <Message Id="thumbwidth" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="476">In method 'AnimatedGifEncoder.WriteImageDesc(int, int)', correct the spelling of 'thumbwidth' in parameter name 'thumbwidth' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#WriteLSD(System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="LSD" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="505">Correct the casing of 'LSD' in member name 'AnimatedGifEncoder.WriteLSD(int, int)' by changing it to 'Lsd'.</Issue>
+            </Message>
+            <Message Id="thumbheight" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="505">In method 'AnimatedGifEncoder.WriteLSD(int, int)', correct the spelling of 'thumbheight' in parameter name 'thumbheight' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+            <Message Id="thumbwidth" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="505">In method 'AnimatedGifEncoder.WriteLSD(int, int)', correct the spelling of 'thumbwidth' in parameter name 'thumbwidth' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#WriteString(System.String)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="s" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="AnimatedGifEncoder.cs" Line="571">In method 'AnimatedGifEncoder.WriteString(string)', consider providing a more meaningful name than parameter name 's'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="GifDecoder" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#GetDelay(System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="n" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="139">In method 'GifDecoder.GetDelay(int)', consider providing a more meaningful name than parameter name 'n'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#GetFrame(System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="n" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="361">In method 'GifDecoder.GetFrame(int)', consider providing a more meaningful name than parameter name 'n'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ReadColorTable(System.Int32)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="ncolors" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="659">In method 'GifDecoder.ReadColorTable(int)', correct the spelling of 'ncolors' in parameter name 'ncolors' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ReadHeader()" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="System.String.StartsWith(System.String)" TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="780">'GifDecoder.ReadHeader()' makes a call to 'string.StartsWith(string)' that does not explicitly provide a StringComparison. This should be replaced with a call to 'string.StartsWith(string, StringComparison)'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ReadLSD()" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="LSD" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="85" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="869">Correct the casing of 'LSD' in member name 'GifDecoder.ReadLSD()' by changing it to 'Lsd'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#ReadShort()" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="short" TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="LanguageSpecificMember" Certainty="75" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="907">Consider replacing the language-specific data type identifier 'Short' in member name 'GifDecoder.ReadShort()' with either a language-independent equivalent or a more generic term, such as 'value'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#SetPixels(System.Int32[])" Kind="Method" Static="False" Accessibility="Private" ExternallyVisible="False">
+           <Messages>
+            <Message Id="height" TypeName="VariableNamesShouldNotMatchFieldNames" Category="Microsoft.Maintainability" CheckId="CA1500" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Name="Local" Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="312">'height', a variable declared in 'GifDecoder.SetPixels(int[])', has the same name as an instance field on the type. Change the name of one of these items.</Issue>
+            </Message>
+            <Message Id="pixels" TypeName="VariableNamesShouldNotMatchFieldNames" Category="Microsoft.Maintainability" CheckId="CA1500" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Name="Parameter" Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="312">'pixels', a parameter declared in 'GifDecoder.SetPixels(int[])', has the same name as an instance field on the type. Change the name of one of these items.</Issue>
+            </Message>
+            <Message Id="width" TypeName="VariableNamesShouldNotMatchFieldNames" Category="Microsoft.Maintainability" CheckId="CA1500" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Name="Local" Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="GifDecoder.cs" Line="312">'width', a variable declared in 'GifDecoder.SetPixels(int[])', has the same name as an instance field on the type. Change the name of one of these items.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="LZWEncoder" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Members>
+          <Member Name="#.ctor(System.Int32,System.Int32,System.Byte[],System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="depth" TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="85" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="LZWEncoder.cs" Line="61">In member 'LZWEncoder.LZWEncoder(int, int, byte[], int)', correct the casing of 'depth' in parameter name 'color_depth' by changing it to 'Depth'.</Issue>
+            </Message>
+            <Message TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="95" Level="Error" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="LZWEncoder.cs" Line="61">In member 'LZWEncoder.LZWEncoder(int, int, byte[], int)', remove the underscores from parameter name 'color_depth'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+        <Type Name="NeuQuant" Kind="Class" Accessibility="Public" ExternallyVisible="True">
+         <Messages>
+          <Message Id="Neu" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+           <Issue Name="Type" Certainty="75" Level="CriticalWarning">Correct the spelling of 'Neu' in type name 'NeuQuant'.</Issue>
+          </Message>
+         </Messages>
+         <Members>
+          <Member Name="#.ctor(System.Byte[],System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="thepic" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="112">In method 'NeuQuant.NeuQuant(byte[], int, int)', correct the spelling of 'thepic' in parameter name 'thepic' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Alterneigh(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="Alterneigh" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="411">Correct the spelling of 'Alterneigh' in member name 'NeuQuant.Alterneigh(int, int, int, int, int)' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+            <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="411">In method 'NeuQuant.Alterneigh(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'b'.</Issue>
+            </Message>
+            <Message Id="g" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="411">In method 'NeuQuant.Alterneigh(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'g'.</Issue>
+            </Message>
+            <Message Id="i" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="411">In method 'NeuQuant.Alterneigh(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'i'.</Issue>
+            </Message>
+            <Message Id="r" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="411">In method 'NeuQuant.Alterneigh(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'r'.</Issue>
+            </Message>
+            <Message Id="rad" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameter" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="411">In method 'NeuQuant.Alterneigh(int, int, int, int, int)', correct the spelling of 'rad' in parameter name 'rad' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Altersingle(System.Int32,System.Int32,System.Int32,System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="Altersingle" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="459">Correct the spelling of 'Altersingle' in member name 'NeuQuant.Altersingle(int, int, int, int, int)' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+            <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="459">In method 'NeuQuant.Altersingle(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'b'.</Issue>
+            </Message>
+            <Message Id="g" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="459">In method 'NeuQuant.Altersingle(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'g'.</Issue>
+            </Message>
+            <Message Id="i" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="459">In method 'NeuQuant.Altersingle(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'i'.</Issue>
+            </Message>
+            <Message Id="r" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="459">In method 'NeuQuant.Altersingle(int, int, int, int, int)', consider providing a more meaningful name than parameter name 'r'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Contest(System.Int32,System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Family" ExternallyVisible="True">
+           <Messages>
+            <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="479">In method 'NeuQuant.Contest(int, int, int)', consider providing a more meaningful name than parameter name 'b'.</Issue>
+            </Message>
+            <Message Id="g" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="479">In method 'NeuQuant.Contest(int, int, int)', consider providing a more meaningful name than parameter name 'g'.</Issue>
+            </Message>
+            <Message Id="r" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="479">In method 'NeuQuant.Contest(int, int, int)', consider providing a more meaningful name than parameter name 'r'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Inxbuild()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="Inxbuild" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="171">Correct the spelling of 'Inxbuild' in member name 'NeuQuant.Inxbuild()' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Map(System.Int32,System.Int32,System.Int32)" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="b" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="310">In method 'NeuQuant.Map(int, int, int)', consider providing a more meaningful name than parameter name 'b'.</Issue>
+            </Message>
+            <Message Id="g" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="310">In method 'NeuQuant.Map(int, int, int)', consider providing a more meaningful name than parameter name 'g'.</Issue>
+            </Message>
+            <Message Id="r" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="MemberParameterMoreMeaningfulName" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="310">In method 'NeuQuant.Map(int, int, int)', consider providing a more meaningful name than parameter name 'r'.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+          <Member Name="#Unbiasnet()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="True">
+           <Messages>
+            <Message Id="Unbiasnet" TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="Breaking">
+             <Issue Name="Member" Certainty="75" Level="CriticalWarning" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\Components" File="NeuQuant.cs" Line="393">Correct the spelling of 'Unbiasnet' in member name 'NeuQuant.Unbiasnet()' or remove it entirely if it represents any sort of Hungarian notation.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+      <Namespace Name="T.Serv">
+       <Types>
+        <Type Name="WebShotServer+HttpWorker" Kind="Class" Accessibility="Public" ExternallyVisible="False">
+         <Members>
+          <Member Name="#Handle()" Kind="Method" Static="False" Accessibility="Public" ExternallyVisible="False">
+           <Messages>
+            <Message TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031" Status="Active" Created="2007-10-04 09:18:37Z" FixCategory="NonBreaking">
+             <Issue Certainty="95" Level="CriticalError" Path="C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder" File="Program.cs" Line="114">Modify 'WebShotServer.HttpWorker.Handle()' to catch a more specific exception than 'object' or rethrow the exception.</Issue>
+            </Message>
+           </Messages>
+          </Member>
+         </Members>
+        </Type>
+       </Types>
+      </Namespace>
+     </Namespaces>
+    </Module>
+   </Modules>
+  </Target>
+ </Targets>
+ <Rules>
+  <Rule TypeName="AvoidCallingProblematicMethods" Category="Microsoft.Reliability" CheckId="CA2001">
+   <Name>Avoid calling problematic methods</Name>
+   <Description>Avoid making unnecessary and potentially dangerous method calls.</Description>
+   <Resolution Name="System.GC.Collect">Remove the call to GC.Collect from {0}. It is usually unnecessary to force garbage collection, and doing so can severely degrade performance.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/bb385973(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Error</MessageLevel>
+   <File Name="ReliabilityRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="DoNotCatchGeneralExceptionTypes" Category="Microsoft.Design" CheckId="CA1031">
+   <Name>Do not catch general exception types</Name>
+   <Description>You should not catch Exception or SystemException. Catching generic exception types can hide run-time problems from the library user, and can complicate debugging. You should catch only those exceptions that you can handle gracefully.</Description>
+   <Resolution Name="Default">Modify {0} to catch a more specific exception than {1} or rethrow the exception.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182137(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">CriticalError</MessageLevel>
+   <File Name="DesignRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="DoNotDeclareVisibleInstanceFields" Category="Microsoft.Design" CheckId="CA1051">
+   <Name>Do not declare visible instance fields</Name>
+   <Description>Instance fields that are visible outside of the type that declares them, limit your ability to change the implementation details for those data items. Use properties instead. They do not compromise usability or performance and they do provide flexibility in that they conceal the implementation details of the underlying data.</Description>
+   <Resolution Name="Default">Because field {0} is visible outside of its declaring type, change its accessibility to private and add a property, with the same accessibility as the field has currently, to provide access to it.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182141(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="90">Error</MessageLevel>
+   <File Name="DesignRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldBeCasedCorrectly" Category="Microsoft.Naming" CheckId="CA1709">
+   <Name>Identifiers should be cased correctly</Name>
+   <Description>Type, namespace, and member identifiers are Pascal-cased. Parameter identifiers are camel-cased. Two letter acronyms within these identifiers should be upper-cased, for example, use System.IO instead of System.Io. Acronyms of three or more letters should be Pascal-cased, for example, use System.Xml instead of System.XML. The pascal-casing convention capitalizes the first letter of each word, as in BackColor. The camel-casing convention formats the first letter of the first word in lowercase and capitalizes the first letter of all subsequent words, as in backgroundColor. Although it may be common practice for some two letter acronyms to not be fully capitalized, violations of this rule should not be excluded for this reason. For example, 'DbConnection', is common but incorrect; use DBConnection. A violation of this rule might be required for compatibility with existing, non-managed symbol schemes. In general, however, these symbols should not be visible outside the assembly that uses them.</Description>
+   <Resolution Name="Assembly">Correct the casing of '{0}' in assembly name {1} by changing it to '{2}'.</Resolution>
+   <Resolution Name="Member">Correct the casing of '{0}' in member name {1} by changing it to '{2}'.</Resolution>
+   <Resolution Name="MemberParameter">In member {0}, correct the casing of '{1}' in parameter name {2} by changing it to '{3}'.</Resolution>
+   <Resolution Name="Type">Correct the casing of '{0}' in type name {1} by changing it to '{2}'.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182240(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="85">Error</MessageLevel>
+   <File Name="NamingRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldBeSpelledCorrectly" Category="Microsoft.Naming" CheckId="CA1704">
+   <Name>Identifiers should be spelled correctly</Name>
+   <Description>The individual words that make up an identifier should not be abbreviated and should be spelled correctly. If this rule generates a false positive on a term that should be recognized, add the word to the FxCop custom dictionary.</Description>
+   <Resolution Name="Assembly">Correct the spelling of '{0}' in assembly name {1}.</Resolution>
+   <Resolution Name="Member">Correct the spelling of '{0}' in member name {1} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+   <Resolution Name="MemberParameter">In method {0}, correct the spelling of '{1}' in parameter name {2} or remove it entirely if it represents any sort of Hungarian notation.</Resolution>
+   <Resolution Name="MemberParameterMoreMeaningfulName">In method {0}, consider providing a more meaningful name than parameter name {1}.</Resolution>
+   <Resolution Name="Type">Correct the spelling of '{0}' in type name {1}.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/bb264492(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">CriticalWarning</MessageLevel>
+   <File Name="NamingRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldNotContainTypeNames" Category="Microsoft.Naming" CheckId="CA1720">
+   <Name>Identifiers should not contain type names</Name>
+   <Description>Avoid using language-specific types name in parameters and members and data type identifiers in parameters. Types names might not be intuitive for all developers. It is recommended that you select a generic name, such as 'value', instead. If this is not sufficient, be sure to use the type name as it is defined in the .NET Framework Library and avoid language-specific type names completely. Some examples of C#-specific type names are 'float' (use 'Single' if a generic name is not sufficient), and 'ulong' (use 'UInt64' if a generic name is not sufficient).</Description>
+   <Resolution Name="LanguageSpecificMember">Consider replacing the language-specific data type identifier '{0}' in member name {1} with either a language-independent equivalent or a more generic term, such as 'value'.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182234(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Error</MessageLevel>
+   <File Name="NamingRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="IdentifiersShouldNotContainUnderscores" Category="Microsoft.Naming" CheckId="CA1707">
+   <Name>Identifiers should not contain underscores</Name>
+   <Description>Do not use underscores when specifying identifiers. Some generated Visual Studio identifiers for applications contain underscore characters. Underscore characters should generally be avoided in public identifiers.</Description>
+   <Resolution Name="MemberParameter">In member {0}, remove the underscores from parameter name {1}.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182245(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="NamingRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="MarkAssembliesWithNeutralResourcesLanguage" Category="Microsoft.Performance" CheckId="CA1824">
+   <Name>Mark assemblies with NeutralResourcesLanguageAttribute</Name>
+   <Description>The NeutralResourcesLanguage attribute informs the ResourceManager of the language used to render the neutral culture's resources for an assembly. When looking up resources in the same culture as the neutral resources language, the ResourceManager automatically uses the resources located in the main assembly, instead of searching for a satellite assembly with the current user interface culture for the current thread. This will improve lookup performance for the first resource you load and can reduce your working set.</Description>
+   <Resolution Name="Default">Because assembly {0} contains a ResX-based resource file, mark it with the NeutralResourcesLanguage attribute, specifying the language of the resources within the assembly. This could improve lookup performance the first time a resource is retrieved.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/bb385967(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Warning</MessageLevel>
+   <File Name="PerformanceRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="MembersShouldNotExposeCertainConcreteTypes" Category="Microsoft.Design" CheckId="CA1059">
+   <Name>Members should not expose certain concrete types</Name>
+   <Description>Members should not expose certain concrete types.</Description>
+   <Resolution Name="Xml">Modify member {0} so that it no longer exposes the concrete type {1}. Use IXPathNavigable to represent XML data sources.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182160(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Error</MessageLevel>
+   <File Name="DesignRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="MovePInvokesToNativeMethodsClass" Category="Microsoft.Design" CheckId="CA1060">
+   <Name>Move P/Invokes to NativeMethods class</Name>
+   <Description>This type contains members with the DllImport attribute. Members with the DllImport attribute should be contained in classes named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Description>
+   <Resolution Name="Default">Because it is a P/Invoke method, {0} should be defined in a class named NativeMethods, SafeNativeMethods, or UnsafeNativeMethods.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182161(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">CriticalWarning</MessageLevel>
+   <File Name="DesignRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="NonConstantFieldsShouldNotBeVisible" Category="Microsoft.Usage" CheckId="CA2211">
+   <Name>Non-constant fields should not be visible</Name>
+   <Description>Static fields should be constant unless you carefully manage access to the field using locks. Using static variables without making them thread safe can compromise execution state. This rule applies to managed code libraries. If the analyzed assembly is an application, it is usually safe to exclude violations of this rule.</Description>
+   <Resolution Name="Default">Consider making {0} non-public or a constant.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182353(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="90">Warning</MessageLevel>
+   <File Name="UsageRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="SpecifyStringComparison" Category="Microsoft.Globalization" CheckId="CA1307">
+   <Name>Specify StringComparison</Name>
+   <Description>If an overload exists that takes a StringComparison argument, it should always be called in favor of an overload that does not.</Description>
+   <Resolution Name="Default">{0} makes a call to {1} that does not explicitly provide a StringComparison. This should be replaced with a call to {2}.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/bb386080(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="GlobalizationRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="TypeNamesShouldNotMatchNamespaces" Category="Microsoft.Naming" CheckId="CA1724">
+   <Name>Type names should not match namespaces</Name>
+   <Description>Identifiers which conflict in whole or in part with namespace names should be avoided. Names that describe the purpose or contents of a type are preferred.</Description>
+   <Resolution Name="Default">The type name {0} conflicts in whole or in part with the namespace name '{1}'. Change either name to eliminate the conflict.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182257(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="NamingRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="UsePropertiesWhereAppropriate" Category="Microsoft.Design" CheckId="CA1024">
+   <Name>Use properties where appropriate</Name>
+   <Description>Properties should be used instead of Get/Set methods in most situations. Methods are preferable to properties in the following situations: the operation is a conversion, is expensive or has an observable side-effect; the order of execution is important; calling the member twice in succession creates different results; a member is static but returns a mutable value; or the member returns an array.</Description>
+   <Resolution Name="Default">Change {0} to a property if appropriate.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182181(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="75">Warning</MessageLevel>
+   <File Name="DesignRules.dll" Version="1.36.0.0" />
+  </Rule>
+  <Rule TypeName="VariableNamesShouldNotMatchFieldNames" Category="Microsoft.Maintainability" CheckId="CA1500">
+   <Name>Variable names should not match field names</Name>
+   <Description>Instance field and variable names should not be identical within the same scope.</Description>
+   <Resolution Name="Local">{0}, a variable declared in {1}, has the same name as an instance field on the type. Change the name of one of these items.</Resolution>
+   <Resolution Name="Parameter">{0}, a parameter declared in {1}, has the same name as an instance field on the type. Change the name of one of these items.</Resolution>
+   <Owner />
+   <Url>http://msdn2.microsoft.com/ms182216(VS.90).aspx</Url>
+   <Email>[none]</Email>
+   <MessageLevel Certainty="95">Error</MessageLevel>
+   <File Name="MaintainabilityRules.dll" Version="1.36.0.0" />
+  </Rule>
+ </Rules>
+ <Localized>
+  <String Key="Category">Category</String>
+  <String Key="Certainty">Certainty</String>
+  <String Key="CollapseAll">Collapse All</String>
+  <String Key="CheckId">Check Id</String>
+  <String Key="Error">Error</String>
+  <String Key="Errors">error(s)</String>
+  <String Key="ExpandAll">Expand All</String>
+  <String Key="Line">Line</String>
+  <String Key="Messages">message(s)</String>
+  <String Key="LocationNotStoredInPdb">[Location not stored in Pdb]</String>
+  <String Key="Project">Project</String>
+  <String Key="Resolution">Resolution</String>
+  <String Key="Rule">Rule</String>
+  <String Key="RuleFile">Rule File</String>
+  <String Key="RuleDescription">Rule Description</String>
+  <String Key="Source">Source</String>
+  <String Key="Status">Status</String>
+  <String Key="Target">Target</String>
+  <String Key="Warning">Warning</String>
+  <String Key="Warnings">warning(s)</String>
+  <String Key="ReportTitle">Code Analysis Report</String>
+ </Localized>
+</FxCopReport>
