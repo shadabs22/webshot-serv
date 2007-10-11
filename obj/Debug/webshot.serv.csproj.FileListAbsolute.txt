@@ -11,3 +11,14 @@ C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\obj\Debug\webshot.
 C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\obj\Debug\webshot.serv.application
 C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\obj\Debug\webshot.serv.exe
 C:\Documents and Settings\strelkov.NMG.000\Desktop\New Folder\obj\Debug\webshot.serv.pdb
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\webshot.serv.exe
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\webshot.serv.pdb
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\ResolveAssemblyReference.cache
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\webshot.serv.Properties.Resources.resources
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\webshot.serv.csproj.GenerateResource.Cache
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\bin\Debug\webshot.serv.exe.manifest
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\bin\Debug\webshot.serv.application
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\bin\Debug\webshot.serv.exe
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\bin\Debug\webshot.serv.pdb
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\webshot.serv.exe.manifest
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Debug\webshot.serv.application

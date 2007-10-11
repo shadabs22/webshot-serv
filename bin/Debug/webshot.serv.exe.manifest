@@ -42,14 +42,14 @@
     </dependentAssembly>
   </dependency>
   <dependency>
-    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="webshot.serv.exe" size="62464">
+    <dependentAssembly dependencyType="install" allowDelayedBinding="true" codebase="webshot.serv.exe" size="60928">
       <assemblyIdentity name="webshot.serv" version="1.0.0.0" publicKeyToken="3389EDF5CF874869" language="neutral" processorArchitecture="msil" />
       <hash>
         <dsig:Transforms>
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>8JHcBGjMzmQREjbCGHcDXZ/ktUQ=</dsig:DigestValue>
+        <dsig:DigestValue>Xgvvy6yHiUQ2xhoegmfJTKzUeuQ=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>

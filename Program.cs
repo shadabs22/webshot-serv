@@ -11,9 +11,10 @@ using GetSiteThumbnail;
 [assembly: CLSCompliant(true)]
 namespace T.Serv
 {
-
     class WebShotServer
     {
+        const int WORKER_COUNT = 4;
+
         public class HttpWorker
         {
             private HttpListenerContext context;
@@ -68,7 +69,7 @@ namespace T.Serv
                     {
                         if (webShot.ReadyState != WebShot.wsReady) queueworker.Enqueue(webShot);
 
-                        if (queueworker.queue.Count <= 1)
+                        if (queueworker.hash.Count == WORKER_COUNT - 1)
                         {
                             DateTime start = DateTime.Now;
                             while (webShot.ReadyState == WebShot.wsNotReady)
@@ -115,9 +116,8 @@ namespace T.Serv
                 { }
             }
   
-            public static WebShotQueueWorker queueworker = new WebShotQueueWorker(4);
+            public static WebShotQueueWorker queueworker = new WebShotQueueWorker(WORKER_COUNT);
                         
-            [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA1801:ReviewUnusedParameters", MessageId = "args"), STAThread]
             public static void Main(string[] args)
             {
 
