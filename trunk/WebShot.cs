@@ -46,6 +46,7 @@ namespace GetSiteThumbnail
 
         public WebShot(NameValueCollection query)
         {
+            DateTime start = DateTime.Now;
             //Качество
             codecParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 90L);
 
@@ -95,6 +96,9 @@ namespace GetSiteThumbnail
                 }
 
                 this.url = uri.ToString();
+
+                span = DateTime.Now - start;
+                Console.WriteLine("WebShot*" + span.Milliseconds);
             }
             catch
             {
@@ -131,6 +135,8 @@ namespace GetSiteThumbnail
         }
         public byte[] GetWaitShot()
         {
+            DateTime start = DateTime.Now;
+
             GifDecoder gifDecoder = new GifDecoder();
 
             AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
@@ -156,6 +162,10 @@ namespace GetSiteThumbnail
             byte[] buffer = outStream.ToArray();
 
             outStream.Close();
+
+            TimeSpan span = DateTime.Now - start;
+            Console.WriteLine("GetWaitShot*" + span.Milliseconds);
+
 
             return buffer;
         }
@@ -210,6 +220,7 @@ namespace GetSiteThumbnail
         }
         private void DocumentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs ex)
         {
+            DateTime start = DateTime.Now;
             int shadowSize = 5;
             int shadowMargin = 2;
 
@@ -266,6 +277,9 @@ namespace GetSiteThumbnail
             }
 
             ReadyState = wsReady;
+
+            TimeSpan span = DateTime.Now - start;
+            Console.WriteLine("DocumentCompletedEventHandler*" + span.Milliseconds);
         }
         private static ImageCodecInfo GetEncoderInfo(String mimeType)
         {
@@ -294,7 +308,7 @@ namespace GetSiteThumbnail
         private readonly object syncRoot;
 
         public Queue<WebShot> queue = new Queue<WebShot>();
-        private Hashtable hash = new Hashtable();
+        public Hashtable hash = new Hashtable();
         private IDictionary<string, ArrayList> data = new Dictionary<string, ArrayList>();
 
         public WebShotQueueWorker(int count)
@@ -310,13 +324,15 @@ namespace GetSiteThumbnail
                 thread.Start();
             }
         }
-
         public void AddNode(string name, string value)
         {
-            if (!data.ContainsKey(name)) data.Add(name, new ArrayList());
+            lock (data)
+            {
+                if (!data.ContainsKey(name)) data.Add(name, new ArrayList());
 
-            data[name].Add(value);
-            if (data[name].Count > 30) data[name].RemoveAt(0);
+                data[name].Add(value);
+                if (data[name].Count > 30) data[name].RemoveAt(0);
+            }
         }
         public XmlDocument GetXml()
         {
@@ -375,7 +391,6 @@ namespace GetSiteThumbnail
                 {
                     hash.Add(webShot.url, "enqueue");
                     queue.Enqueue(webShot);
-                    Console.Title = "queue.Count: " + queue.Count;
                 }
             }
         }
@@ -398,12 +413,15 @@ namespace GetSiteThumbnail
                             if (queue.Count > 0)
                             {
                                 webShot = queue.Dequeue();
-                                Console.Title = "queue.Count: " + queue.Count;
                             }
+                            Console.Title = "queue.Count: " + queue.Count + ", hash.Count: " + hash.Count;
                         }
 
                         if (webShot == null) Thread.Sleep(100);
                     }
+
+                    DateTime start = DateTime.Now;
+
 
                     hash[webShot.url] = "fetching";
 
@@ -424,7 +442,7 @@ namespace GetSiteThumbnail
 
                     webBrowser.Navigate(webShot.url, false);
 
-                    DateTime start = DateTime.Now;
+                    DateTime start1 = DateTime.Now;
                     while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
                     {
                         if (GetQueueStatus(QS_ALLINPUT) != 0)
@@ -448,6 +466,11 @@ namespace GetSiteThumbnail
                     GC.Collect();
 
                     hash.Remove(webShot.url);
+
+                    TimeSpan span1 = DateTime.Now - start1;
+                    Console.WriteLine("Dequeue*" + span1.Milliseconds);
+
+
                 }
             }
         }
