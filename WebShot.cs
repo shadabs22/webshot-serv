@@ -17,10 +17,11 @@ using Gif.Components;
 using System.Resources;
 using System.Xml;
 using System.Diagnostics;
+using T.Serv;
 
 namespace GetSiteThumbnail
 {
-    public class WebShot: IDisposable
+    public class WebShot : IDisposable
     {
         private Bitmap docThumbnail;
         private Graphics gfx;
@@ -46,7 +47,6 @@ namespace GetSiteThumbnail
 
         public WebShot(NameValueCollection query)
         {
-            DateTime start = DateTime.Now;
             //Качество
             codecParams.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, 90L);
 
@@ -96,9 +96,6 @@ namespace GetSiteThumbnail
                 }
 
                 this.url = uri.ToString();
-
-                span = DateTime.Now - start;
-                Console.WriteLine("WebShot*" + span.Milliseconds);
             }
             catch
             {
@@ -135,8 +132,6 @@ namespace GetSiteThumbnail
         }
         public byte[] GetWaitShot()
         {
-            DateTime start = DateTime.Now;
-
             GifDecoder gifDecoder = new GifDecoder();
 
             AnimatedGifEncoder gifEncoder = new AnimatedGifEncoder();
@@ -162,10 +157,6 @@ namespace GetSiteThumbnail
             byte[] buffer = outStream.ToArray();
 
             outStream.Close();
-
-            TimeSpan span = DateTime.Now - start;
-            Console.WriteLine("GetWaitShot*" + span.Milliseconds);
-
 
             return buffer;
         }
@@ -220,7 +211,6 @@ namespace GetSiteThumbnail
         }
         private void DocumentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs ex)
         {
-            DateTime start = DateTime.Now;
             int shadowSize = 5;
             int shadowMargin = 2;
 
@@ -277,9 +267,6 @@ namespace GetSiteThumbnail
             }
 
             ReadyState = wsReady;
-
-            TimeSpan span = DateTime.Now - start;
-            Console.WriteLine("DocumentCompletedEventHandler*" + span.Milliseconds);
         }
         private static ImageCodecInfo GetEncoderInfo(String mimeType)
         {
@@ -303,84 +290,29 @@ namespace GetSiteThumbnail
     public class WebShotQueueWorker
     {
         private const int QS_ALLINPUT = 255;
-        [DllImport("user32")] private static extern int GetQueueStatus(int fuFlags);
+        [DllImport("user32")]
+        private static extern int GetQueueStatus(int fuFlags);
 
         private readonly object syncRoot;
 
         public Queue<WebShot> queue = new Queue<WebShot>();
         public Hashtable hash = new Hashtable();
+        public int count;
+
         private IDictionary<string, ArrayList> data = new Dictionary<string, ArrayList>();
 
         public WebShotQueueWorker(int count)
         {
+            this.count = count;
             syncRoot = new object();
             new Thread(new ThreadStart(this.Gather)).Start();
 
             for (int i = 1; i <= count; i++)
             {
-                Thread thread = new Thread(new ThreadStart(this.Dequeue));
+                Thread thread = new Thread(new ThreadStart(this.Fetch));
                 thread.SetApartmentState(ApartmentState.STA);
-                thread.Priority = ThreadPriority.BelowNormal;
+                thread.Priority = ThreadPriority.Normal;
                 thread.Start();
-            }
-        }
-        public void AddNode(string name, string value)
-        {
-            lock (data)
-            {
-                if (!data.ContainsKey(name)) data.Add(name, new ArrayList());
-
-                data[name].Add(value);
-                if (data[name].Count > 30) data[name].RemoveAt(0);
-            }
-        }
-        public XmlDocument GetXml()
-        {
-            XmlDocument doc = new XmlDocument();
-            XmlElement newnode, child;
-
-            doc.Load(new StringReader(webshot.serv.Properties.Resources.index));
-            //doc.Load(new XmlTextReader("./index.xml"));
-            
-            newnode = doc.CreateElement("version");
-            newnode.InnerText = webshot.serv.Properties.Resources.Version;
-            doc.DocumentElement.AppendChild(newnode);
-
-            foreach (KeyValuePair<string, ArrayList> kvp in data)
-            {
-                newnode = doc.CreateElement(kvp.Key);
-                foreach (string s in kvp.Value)
-                {
-                    child = doc.CreateElement("value");
-                    child.InnerText = s;
-                    newnode.AppendChild(child);
-                }
-                doc.DocumentElement.AppendChild(newnode);
-            }
-            
-            newnode = doc.CreateElement("hash");
-            foreach (string url in hash.Keys)
-            {
-                child = doc.CreateElement("value");
-                child.SetAttribute("status", hash[url].ToString());
-                child.InnerText = url;
-                newnode.AppendChild(child);
-            }
-
-            doc.DocumentElement.AppendChild(newnode);
-            
-            return doc;
-        }
-        private void Gather()
-        {
-            PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
-            PerformanceCounter ramCounter = new PerformanceCounter("Memory", "Available MBytes");
-
-            while (true)
-            {
-                AddNode("processor", cpuCounter.NextValue().ToString());
-                AddNode("memory", ramCounter.NextValue().ToString());
-                Thread.Sleep(1000);
             }
         }
         public void Enqueue(WebShot webShot)
@@ -394,34 +326,31 @@ namespace GetSiteThumbnail
                 }
             }
         }
-        private void Dequeue()
+        private void Fetch()
         {
-            using (WebBrowser webBrowser = new WebBrowser())
+            while (true)
             {
-                webBrowser.Size = new Size(WebShot.width, WebShot.height);
-                webBrowser.ScrollBarsEnabled = false;
-                webBrowser.ScriptErrorsSuppressed = true;
-    
-                while (true)
+                WebShot webShot = null;
+
+                while (webShot == null)
                 {
-                    WebShot webShot = null;
-
-                    while (webShot == null)
+                    lock (this.syncRoot)
                     {
-                        lock (this.syncRoot)
+                        if (queue.Count > 0)
                         {
-                            if (queue.Count > 0)
-                            {
-                                webShot = queue.Dequeue();
-                            }
-                            Console.Title = "queue.Count: " + queue.Count + ", hash.Count: " + hash.Count;
+                            webShot = queue.Dequeue();
                         }
-
-                        if (webShot == null) Thread.Sleep(100);
+                        Console.Title = "queue.Count: " + queue.Count + ", hash.Count: " + hash.Count;
                     }
 
-                    DateTime start = DateTime.Now;
+                    if (webShot == null) Thread.Sleep(100);
+                }
 
+                using (WebBrowser webBrowser = new WebBrowser())
+                {
+                    webBrowser.Size = new Size(WebShot.width, WebShot.height);
+                    webBrowser.ScrollBarsEnabled = false;
+                    webBrowser.ScriptErrorsSuppressed = true;
 
                     hash[webShot.url] = "fetching";
 
@@ -439,10 +368,9 @@ namespace GetSiteThumbnail
                     }
 
                     webShot.HookEvents(webBrowser);
-
                     webBrowser.Navigate(webShot.url, false);
 
-                    DateTime start1 = DateTime.Now;
+                    DateTime start = DateTime.Now;
                     while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
                     {
                         if (GetQueueStatus(QS_ALLINPUT) != 0)
@@ -460,18 +388,69 @@ namespace GetSiteThumbnail
                         }
                     }
                     webShot.Save();
-
                     webBrowser.Stop();
-                    webBrowser.Navigate("about:blank");
-                    GC.Collect();
-
-                    hash.Remove(webShot.url);
-
-                    TimeSpan span1 = DateTime.Now - start1;
-                    Console.WriteLine("Dequeue*" + span1.Milliseconds);
-
-
                 }
+
+                hash.Remove(webShot.url);
+            }
+        }
+        public XmlDocument GetXml()
+        {
+            XmlDocument doc = new XmlDocument();
+            XmlElement newnode, child;
+
+            doc.Load(new StringReader(webshot.serv.Properties.Resources.index));
+            //doc.Load(new XmlTextReader("./index.xml"));
+
+            newnode = doc.CreateElement("version");
+            newnode.InnerText = webshot.serv.Properties.Resources.Version;
+            doc.DocumentElement.AppendChild(newnode);
+
+            foreach (KeyValuePair<string, ArrayList> kvp in data)
+            {
+                newnode = doc.CreateElement(kvp.Key);
+                foreach (string s in kvp.Value)
+                {
+                    child = doc.CreateElement("value");
+                    child.InnerText = s;
+                    newnode.AppendChild(child);
+                }
+                doc.DocumentElement.AppendChild(newnode);
+            }
+
+            newnode = doc.CreateElement("hash");
+            foreach (string url in hash.Keys)
+            {
+                child = doc.CreateElement("value");
+                child.SetAttribute("status", hash[url].ToString());
+                child.InnerText = url;
+                newnode.AppendChild(child);
+            }
+
+            doc.DocumentElement.AppendChild(newnode);
+
+            return doc;
+        }
+        public void AddNode(string name, string value)
+        {
+            lock (data)
+            {
+                if (!data.ContainsKey(name)) data.Add(name, new ArrayList());
+
+                data[name].Add(value);
+                if (data[name].Count > 30) data[name].RemoveAt(0);
+            }
+        }
+        private void Gather()
+        {
+            PerformanceCounter cpuCounter = new PerformanceCounter("Processor", "% Processor Time", "_Total");
+            PerformanceCounter ramCounter = new PerformanceCounter("Memory", "Available MBytes");
+
+            while (true)
+            {
+                AddNode("processor", cpuCounter.NextValue().ToString());
+                AddNode("memory", ramCounter.NextValue().ToString());
+                Thread.Sleep(1000);
             }
         }
     }
