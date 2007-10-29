@@ -49,8 +49,17 @@
           <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
         </dsig:Transforms>
         <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
-        <dsig:DigestValue>W+a4sPc4sGjecNySsiD8s2VwxX0=</dsig:DigestValue>
+        <dsig:DigestValue>iyhqn+M9xdhxHmBnVC2UveGxcrI=</dsig:DigestValue>
       </hash>
     </dependentAssembly>
   </dependency>
+  <file name="webshot.serv.exe.config" size="77">
+    <hash>
+      <dsig:Transforms>
+        <dsig:Transform Algorithm="urn:schemas-microsoft-com:HashTransforms.Identity" />
+      </dsig:Transforms>
+      <dsig:DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1" />
+      <dsig:DigestValue>w7WNgu5MxCvL4DAgISBxgwmhDzU=</dsig:DigestValue>
+    </hash>
+  </file>
 </asmv1:assembly>

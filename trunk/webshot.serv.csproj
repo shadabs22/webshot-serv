@@ -128,6 +128,7 @@
     <None Include="Resources\index.xml.txt" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="app.config" />
     <None Include="Resources\index.xml" />
     <None Include="webshot.serv_TemporaryKey.pfx" />
   </ItemGroup>

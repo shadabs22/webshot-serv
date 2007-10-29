@@ -20,3 +20,4 @@ C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Release\websh
 C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Release\webshot.serv.csproj.GenerateResource.Cache
 C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Release\webshot.serv.exe.manifest
 C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\obj\Release\webshot.serv.application
+C:\Documents and Settings\strelkov.NMG.000\Desktop\code.google\bin\Release\webshot.serv.exe.config
