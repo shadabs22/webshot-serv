@@ -134,7 +134,7 @@ namespace T.Serv
                     new Thread(new ThreadStart(new HttpWorker(context).Handle)).Start();
 
                     TimeSpan span = DateTime.Now - start;
-                    if (span.Hours > 3) System.Environment.Exit(-1);
+                    if (span.Hours > 5) System.Environment.Exit(-1);
                 }
             }
         }

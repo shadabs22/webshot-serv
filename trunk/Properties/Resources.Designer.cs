@@ -127,7 +127,7 @@ namespace webshot.serv.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to 1.3r.
+        ///   Looks up a localized string similar to 1.4b.
         /// </summary>
         internal static string Version {
             get {
