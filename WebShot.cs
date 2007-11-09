@@ -11,12 +11,13 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.Net;
-using System.Web;
+//using System.Web;
 using FastImage;
 using Gif.Components;
 using System.Resources;
 using System.Xml;
 using System.Diagnostics;
+//using SHDocVw;
 using T.Serv;
 
 namespace GetSiteThumbnail
@@ -209,6 +210,7 @@ namespace GetSiteThumbnail
             // Don't want pop-ups.
             e.Cancel = true;
         }
+
         private void DocumentCompletedEventHandler(object sender, WebBrowserDocumentCompletedEventArgs ex)
         {
             int shadowSize = 5;
@@ -293,12 +295,11 @@ namespace GetSiteThumbnail
         [DllImport("user32")]
         private static extern int GetQueueStatus(int fuFlags);
 
+        public int count;
         private readonly object syncRoot;
-
         public Queue<WebShot> queue = new Queue<WebShot>();
         public Hashtable hash = new Hashtable();
-        public int count;
-
+        
         private IDictionary<string, ArrayList> data = new Dictionary<string, ArrayList>();
 
         public WebShotQueueWorker(int count)
@@ -351,7 +352,8 @@ namespace GetSiteThumbnail
                     webBrowser.Size = new Size(WebShot.width, WebShot.height);
                     webBrowser.ScrollBarsEnabled = false;
                     webBrowser.ScriptErrorsSuppressed = true;
-
+                   // webBrowser.Silent
+                    (SHDocVw.IWebBrowser2)webBrowser.Silent = true;
                     hash[webShot.url] = "fetching";
 
                     switch (webShot.ReadyState)
@@ -388,7 +390,6 @@ namespace GetSiteThumbnail
                         }
                     }
                     webShot.Save();
-                    webBrowser.Stop();
                 }
 
                 hash.Remove(webShot.url);
