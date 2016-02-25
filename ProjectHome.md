@@ -1,0 +1,1 @@
+Http server on c# that listens request and responses a thumbnail of remote website (webshot)
